@@ -66,14 +66,16 @@ class Supervisor:
     def add_limit_order(self, qty: int, price: Decimal, hidden=False, passive=False, reduce_only=False,
                         callback: Callable = None):
         exec_inst = []
+        display_qty = None
         if hidden:
-            raise NotImplementedError
+            display_qty = 0
         if passive:
             exec_inst.append('ParticipateDoNotInitiate')
         if reduce_only:
             exec_inst.append('Close')
 
-        new_order = make_order_dict(order_type='Limit', qty=qty, price=price, exec_inst=','.join(exec_inst))
+        new_order = make_order_dict(order_type='Limit', qty=qty, price=price,
+                                    exec_inst=','.join(exec_inst), display_qty=display_qty)
         self._orders.append(new_order)
         # add callback to order dict
         if callback is not None:

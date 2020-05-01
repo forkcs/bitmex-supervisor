@@ -2,7 +2,8 @@ from typing import List, Dict
 from uuid import uuid4
 
 
-def make_order_dict(*, order_type=None, qty=None, price=None, stop_px=None, exec_inst=None, clordid=None) -> Dict:
+def make_order_dict(*, order_type=None, qty=None, price=None, stop_px=None,
+                    exec_inst=None, display_qty: int = None, clordid=None) -> Dict:
     order_dict = {}
     if order_type is not None:
         order_dict['ordType'] = order_type
@@ -14,6 +15,8 @@ def make_order_dict(*, order_type=None, qty=None, price=None, stop_px=None, exec
         order_dict['stopPx'] = stop_px
     if exec_inst is not None:
         order_dict['execInst'] = exec_inst
+    if display_qty is not None:
+        order_dict['displayQty'] = display_qty
     if clordid is not None:
         order_dict['clOrdID'] = clordid
     return order_dict

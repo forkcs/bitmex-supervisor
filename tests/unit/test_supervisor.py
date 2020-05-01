@@ -62,8 +62,15 @@ class AddOrderTests(unittest.TestCase):
         self.assertIn(expected_order, self.supervisor._orders)
 
     def test_add_limit_hidden_order(self):
-        with self.assertRaises(NotImplementedError):
-            self.supervisor.add_limit_order(qty=228, price=Decimal(1000), hidden=True)
+        expected_order = {
+            'ordType': 'Limit',
+            'orderQty': 228,
+            'price': 1000,
+            'execInst': '',
+            'displayQty': 0
+        }
+        self.supervisor.add_limit_order(qty=228, price=Decimal(1000), hidden=True)
+        self.assertIn(expected_order, self.supervisor._orders)
 
     def test_remove_limit_order(self):
         order = self.supervisor.add_limit_order(qty=228, price=Decimal(1000))
