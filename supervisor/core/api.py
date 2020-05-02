@@ -6,11 +6,11 @@ import json
 import logging
 
 from decimal import Decimal
-from core.auth import APIKeyAuthWithExpires
-from core.ws_thread import BitMEXWebsocket
-from core import settings
-from core.utils import errors
-from core.utils.log import setup_custom_logger
+from supervisor.core.auth import APIKeyAuthWithExpires
+from supervisor.core.ws_thread import BitMEXWebsocket
+from supervisor.core import settings
+from supervisor.core.utils import errors
+from supervisor.core.utils.log import setup_custom_logger
 
 
 class DecimalEncoder(json.JSONEncoder):

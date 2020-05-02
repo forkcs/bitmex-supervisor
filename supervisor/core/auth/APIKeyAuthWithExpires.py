@@ -1,6 +1,6 @@
 import time
 from requests.auth import AuthBase
-from core.auth import generate_signature
+from supervisor.core.auth import generate_signature
 
 
 class APIKeyAuthWithExpires(AuthBase):

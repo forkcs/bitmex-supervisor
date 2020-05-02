@@ -2,8 +2,8 @@ import json
 import unittest
 import responses
 
-from core import settings
-from core.interface import Exchange
+from supervisor.core import settings
+from supervisor.core.interface import Exchange
 
 
 class InterfaceHttpMethodsTests(unittest.TestCase):

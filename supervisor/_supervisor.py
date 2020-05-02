@@ -3,7 +3,7 @@ from decimal import Decimal
 from threading import Thread, Event
 from typing import Callable
 
-from core.utils.orders import make_order_dict, order_in_order_list, remove_order_from_order_list
+from supervisor.core.utils.orders import make_order_dict, order_in_order_list, remove_order_from_order_list
 
 
 class Supervisor:

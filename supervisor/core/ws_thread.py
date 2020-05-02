@@ -7,10 +7,9 @@ from time import sleep
 import json
 import decimal
 import logging
-from core.auth import generate_expires, generate_signature
-from core.utils.log import setup_custom_logger
-from core.utils.math import toNearest
-from core import settings
+from supervisor.core.auth import generate_expires, generate_signature
+from supervisor.core.utils.log import setup_custom_logger
+from supervisor.core.utils.math import toNearest
 from urllib.parse import urlparse, urlunparse
 
 

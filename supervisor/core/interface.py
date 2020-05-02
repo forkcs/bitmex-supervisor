@@ -1,4 +1,4 @@
-from core.api import BitMEX
+from supervisor.core.api import BitMEX
 
 
 class Exchange:
