@@ -55,12 +55,3 @@ def get_order_from_order_list(order: Dict, order_list: List[Dict]) -> dict:
     order_to_get = list(filter(lambda o: orders_are_equal(o, order), order_list))[0]
     return order_to_get
 
-
-def _generate_clordid() -> str:
-    return str(uuid4())
-
-
-def set_clordid(order: dict) -> str:
-    new_clordid = _generate_clordid()
-    order['clOrdID'] = new_clordid
-    return new_clordid
