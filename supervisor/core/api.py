@@ -619,7 +619,7 @@ class BitMEX(object):
 
     @authentication_required
     def order_create(self, symbol=None, side=None, orderQty=None, price=None, displayQty=None, stopPx=None, clOrdID=None,
-                     pegOffsetValue=None, pegPriceType=None, ordType=None, timeInForce=None, execInst=None, text=None, postdict=None, need_repeat=False):
+                     pegOffsetValue=None, pegPriceType=None, ordType=None, timeInForce=None, execInst=None, text=None, postdict=None, need_repeat=False, **kwargs):
         """Create a new order."""
         if postdict is None:
             postdict = {

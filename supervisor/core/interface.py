@@ -99,7 +99,9 @@ class Exchange:
         return self.conn.order_create(orderQty=qty, price=price, ordType=order_type, displayQty=display_qty,
                                       clOrdID=clordid, execInst=exec_inst, stopPx=stop_px)
 
-    def bulk_place_orders(self, *orders):
+    def bulk_place_orders(self, orders):
+        for o in orders:
+            o['symbol'] = self.symbol
         return self.conn.order_bulk_create(orders=orders)
 
     def cancel_order(self, *, clordid=None, order_id=None):

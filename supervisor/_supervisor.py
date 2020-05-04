@@ -3,8 +3,7 @@ from threading import Thread, Event
 from time import sleep
 from typing import Callable
 
-from supervisor.core.utils.orders import make_order_dict, order_in_order_list, remove_order_from_order_list, \
-    get_order_from_order_list
+from supervisor.core.orders import Order
 
 
 class Supervisor:
@@ -50,11 +49,11 @@ class Supervisor:
         raise NotImplementedError
 
     def check_filled_orders(self):
-        filled_orders = self.exchange.get_filled_orders_ws()
+        filled_orders = [Order.from_dict(order_dict) for order_dict in self.exchange.get_filled_orders_ws()]
         for order in self._orders:
-            if order_in_order_list(order, filled_orders):
+            if order in filled_orders:
                 # don`t place this order again, forget it
-                remove_order_from_order_list(order, self._orders)
+                self._orders.remove(order)
                 # exec callback
                 callback = order.get('callback', None)
                 if callback is not None:
@@ -64,67 +63,37 @@ class Supervisor:
     # Orders #
     ##########
 
-    def add_limit_order(self, qty: int, price: Decimal, hidden=False, passive=False, reduce_only=False,
-                        callback: Callable = None):
-        exec_inst = []
-        display_qty = None
-        if hidden:
-            display_qty = 0
-        if passive:
-            exec_inst.append('ParticipateDoNotInitiate')
-        if reduce_only:
-            exec_inst.append('Close')
-
-        new_order = make_order_dict(order_type='Limit', qty=qty, price=price,
-                                    exec_inst=','.join(exec_inst), display_qty=display_qty)
-        self._orders.append(new_order)
+    def add_order(self, order: Order, callback: Callable = None) -> None:
+        self._orders.append(order)
         # add callback to order dict
         if callback is not None:
-            new_order['callback'] = callback
-        return new_order
+            order.add_callback(callback)
 
-    def add_stop_order(self, qty: int, stop_px: Decimal, reduce_only=False,
-                       callback: Callable = None):
-        exec_inst = ''
-        if reduce_only:
-            exec_inst = 'Close'
-        new_order = make_order_dict(order_type='Stop', qty=qty, stop_px=stop_px, exec_inst=exec_inst)
-        self._orders.append(new_order)
-        # add callback to order dict
-        if callback is not None:
-            new_order['callback'] = callback
-        return new_order
+    def remove_order(self, order: Order):
+        self._orders.remove(order)
 
-    def remove_order(self, order: dict):
-        if order_in_order_list(order, self._orders):
-            remove_order_from_order_list(order, self._orders)
+    def move_order(self, order: Order, to: Decimal):
+        if order in self._orders:
+            Order.move(to=to)
 
-    def move_order(self, order: dict, price: Decimal = None, stop_px: Decimal = None):
-        if order_in_order_list(order, self._orders):
-            order_to_move = get_order_from_order_list(order, self._orders)
-        else:
-            raise ValueError('Order not found.')
-        if order_to_move['ordType'] == 'Limit':
-            order_to_move['price'] = price
-        elif order_to_move['ordType'] == 'Stop':
-            order_to_move['stopPx'] = stop_px
-
-    def place_unplaced_orders(self, real_orders):
+    def place_unplaced_orders(self, real_order_dicts: list):
+        real_orders = [Order.from_dict(order_dict) for order_dict in real_order_dicts]
         orders_to_place = []
-        for o in self._orders:
-            if not order_in_order_list(o, real_orders):
-                orders_to_place.append(o)
+        for order in self._orders:
+            if order not in real_orders:
+                orders_to_place.append(order.as_dict())
         if orders_to_place:
             if len(orders_to_place) == 1:
                 self.exchange.place_order(order_dict=orders_to_place[0])
             else:
-                self.exchange.bulk_place_orders(orders=orders_to_place)
+                self.exchange.bulk_place_orders(orders_to_place)
 
-    def cancel_needless_orders(self, real_orders):
+    def cancel_needless_orders(self, real_order_dicts):
+        real_orders = [Order.from_dict(order_dict) for order_dict in real_order_dicts]
         orders_to_cancel_ids = []
         for o in real_orders:
-            if not order_in_order_list(o, self._orders):
-                orders_to_cancel_ids.append(o['orderID'])
+            if o not in self._orders:
+                orders_to_cancel_ids.append(o.order_id)
         if orders_to_cancel_ids:
             self.exchange.bulk_cancel_orders(order_id_list=orders_to_cancel_ids)
 

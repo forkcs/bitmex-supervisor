@@ -3,10 +3,10 @@ from decimal import Decimal
 
 class Order:
     def __init__(self,
-                 order_id: str = None,
                  order_type: str = None,
                  clordid: str = None,
                  qty: int = None,
+                 side: str = None,
                  price: Decimal = None,
                  stop_px: Decimal = None,
                  hidden: bool = False,
@@ -14,10 +14,11 @@ class Order:
                  reduce_only: bool = False,
                  passive: bool = False):
 
-        self.order_id = order_id
+        self.order_id: str = ''
         self.order_type = order_type
         self.clordid = clordid
         self.qty = qty
+        self.side = side
         self.price = price
         self.stop_px = stop_px
         self.hidden = hidden
@@ -56,6 +57,12 @@ class Order:
         # stop_px must be positive
         if self.stop_px is not None and self.stop_px <= 0:
             return False
+        # for sell orders use side='Sell'
+        if self.qty <= 0:
+            return False
+        # side only can be Buy or Sell
+        if self.side is not None and self.side not in ['Buy', 'Sell']:
+            return False
         return True
 
     def get_comparison_params(self) -> list:
@@ -64,6 +71,7 @@ class Order:
         parameters = [
             self.order_type,
             self.qty,
+            self.side,
             self.price,
             self.stop_px,
             self.hidden,
@@ -73,7 +81,7 @@ class Order:
         ]
         return parameters
 
-    def as_dict(self, include_empty=True) -> dict:
+    def as_dict(self, include_empty=False) -> dict:
         """This order representation made to be similar to BitMEX API order objects."""
 
         order_dict = {}
@@ -87,6 +95,8 @@ class Order:
             order_dict['clOrdID'] = self.clordid
         if self.qty is not None or include_empty:
             order_dict['orderQty'] = self.qty
+        if self.side is not None or include_empty:
+            order_dict['side'] = self.side
         if self.price is not None or include_empty:
             order_dict['price'] = float(self.price)  # float(Decimal) for json.dumps works correctly
         if self.stop_px is not None or include_empty:
@@ -114,6 +124,7 @@ class Order:
         new_order.order_id = order_dict.get('orderID', None)
         new_order.order_type = order_dict.get('ordType', None)
         new_order.qty = order_dict.get('orderQty', None)
+        new_order.side = order_dict.get('side', None)
 
         price = order_dict.get('price', None)
         if price is not None:
