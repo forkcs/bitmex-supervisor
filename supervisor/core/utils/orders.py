@@ -49,6 +49,13 @@ def remove_order_from_order_list(order: Dict, order_list: List[Dict]) -> None:
     order_list.remove(order_to_remove)
 
 
+def get_order_from_order_list(order: Dict, order_list: List[Dict]) -> dict:
+    """ Should be used after order_in_order_list check!"""
+
+    order_to_get = list(filter(lambda o: orders_are_equal(o, order), order_list))[0]
+    return order_to_get
+
+
 def _generate_clordid() -> str:
     return str(uuid4())
 

@@ -1,9 +1,10 @@
-from time import sleep
 from decimal import Decimal
 from threading import Thread, Event
+from time import sleep
 from typing import Callable
 
-from supervisor.core.utils.orders import make_order_dict, order_in_order_list, remove_order_from_order_list
+from supervisor.core.utils.orders import make_order_dict, order_in_order_list, remove_order_from_order_list, \
+    get_order_from_order_list
 
 
 class Supervisor:
@@ -97,6 +98,16 @@ class Supervisor:
     def remove_order(self, order: dict):
         if order_in_order_list(order, self._orders):
             remove_order_from_order_list(order, self._orders)
+
+    def move_order(self, order: dict, price: Decimal = None, stop_px: Decimal = None):
+        if order_in_order_list(order, self._orders):
+            order_to_move = get_order_from_order_list(order, self._orders)
+        else:
+            raise ValueError('Order not found.')
+        if order_to_move['ordType'] == 'Limit':
+            order_to_move['price'] = price
+        elif order_to_move['ordType'] == 'Stop':
+            order_to_move['stopPx'] = stop_px
 
     def place_unplaced_orders(self, real_orders):
         orders_to_place = []

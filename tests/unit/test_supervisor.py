@@ -163,3 +163,42 @@ class FilledOrderCallbackTests(unittest.TestCase):
         self.assertNotIn(order, self.supervisor._orders)
         # assert the callback was called
         callback_mock.assert_called_once()
+
+
+class EditOrderTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.exchange_mock = Mock()
+        cls.supervisor = Supervisor(interface=cls.exchange_mock)
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        cls.supervisor.exit_cycle()
+
+    def tearDown(self) -> None:
+        self.supervisor.reset()
+        self.exchange_mock.reset_mock()
+
+    def test_move_limit_order(self):
+        expected_order = {
+            'ordType': 'Limit',
+            'orderQty': 228,
+            'price': 1001,
+            'execInst': '',
+        }
+        order = self.supervisor.add_limit_order(qty=228, price=Decimal(1000))
+        self.supervisor.move_order(order, price=Decimal(1001))
+
+        self.assertListEqual([expected_order], self.supervisor._orders)
+
+    def test_move_stop_order(self):
+        expected_order = {
+            'ordType': 'Stop',
+            'orderQty': 228,
+            'stopPx': 1001,
+            'execInst': '',
+        }
+        order = self.supervisor.add_stop_order(qty=228, stop_px=Decimal(1000))
+        self.supervisor.move_order(order, stop_px=Decimal(1001))
+
+        self.assertListEqual([expected_order], self.supervisor._orders)
