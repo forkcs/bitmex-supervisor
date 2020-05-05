@@ -34,37 +34,29 @@ class Supervisor:
             if self._run_thread.is_set():
                 # Synchronize all here
                 self.sync_orders()
-                self.check_filled_orders()
             else:
                 self._stopped.set()
                 self._run_thread.wait()
-            sleep(0.1)
+            sleep(1)
 
     def sync_orders(self):
-        real_orders = self.exchange.get_open_orders_ws()
-        self.cancel_needless_orders(real_orders)
-        self.place_unplaced_orders(real_orders)
+        for order in self._orders:
+            if order.order_id is None:
+                pass
 
     def sync_position(self):
-        raise NotImplementedError
+        raise NotImplemented
 
-    def check_filled_orders(self):
-        filled_orders = [Order.from_dict(order_dict) for order_dict in self.exchange.get_filled_orders_ws()]
-        for order in self._orders:
-            if order in filled_orders:
-                # don`t place this order again, forget it
-                self._orders.remove(order)
-                # exec callback
-                callback = order.get('callback', None)
-                if callback is not None:
-                    callback()
+    def check_orders_status(self):
+        raise NotImplemented
 
     ##########
     # Orders #
     ##########
 
     def add_order(self, order: Order, callback: Callable = None) -> None:
-        self._orders.append(order)
+        if order.is_valid():
+            self._orders.append(order)
         # add callback to order dict
         if callback is not None:
             order.add_callback(callback)
@@ -74,28 +66,7 @@ class Supervisor:
 
     def move_order(self, order: Order, to: Decimal):
         if order in self._orders:
-            Order.move(to=to)
-
-    def place_unplaced_orders(self, real_order_dicts: list):
-        real_orders = [Order.from_dict(order_dict) for order_dict in real_order_dicts]
-        orders_to_place = []
-        for order in self._orders:
-            if order not in real_orders:
-                orders_to_place.append(order.as_dict())
-        if orders_to_place:
-            if len(orders_to_place) == 1:
-                self.exchange.place_order(order_dict=orders_to_place[0])
-            else:
-                self.exchange.bulk_place_orders(orders_to_place)
-
-    def cancel_needless_orders(self, real_order_dicts):
-        real_orders = [Order.from_dict(order_dict) for order_dict in real_order_dicts]
-        orders_to_cancel_ids = []
-        for o in real_orders:
-            if o not in self._orders:
-                orders_to_cancel_ids.append(o.order_id)
-        if orders_to_cancel_ids:
-            self.exchange.bulk_cancel_orders(order_id_list=orders_to_cancel_ids)
+            order.move(to=to)
 
     ###################
     # Control methods #

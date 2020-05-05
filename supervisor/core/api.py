@@ -690,11 +690,11 @@ class BitMEX(object):
         return self.call_api(path=path, postdict=postdict, verb="PUT")
 
     @authentication_required
-    def order_bulk_create(self, orders=None, postdict=None):
+    def order_bulk_create(self, order_dicts=None, postdict=None):
         """Create multiple new orders for the same symbol."""
         if postdict is None:
             postdict = {
-                'orders': orders if orders else '',
+                'orders': order_dicts if order_dicts else '',
             }
         path = "/order/bulk"
         return self.call_api(path=path, postdict=postdict, verb="POST")

@@ -1,8 +1,10 @@
 import json
 import unittest
 import responses
+from decimal import Decimal
 
 from supervisor.core import settings
+from supervisor.core.orders import Order
 from supervisor.core.interface import Exchange
 
 
@@ -57,13 +59,29 @@ class InterfaceHttpMethodsTests(unittest.TestCase):
             self.assertEqual(leverage, 13)
 
     def test_bulk_place_orders(self):
-        order1 = {'ordType': 'Limit', 'orderQty': 228, 'price': 1000}
-        order2 = {'ordType': 'Limit', 'orderQty': 229, 'price': 1001}
+        order1 = Order(order_type='Limit', price=Decimal(1000), qty=228)
+        order2 = Order(order_type='Limit', price=Decimal(1001), qty=229)
+
+        expected_orders = [
+            {
+                'ordType': 'Limit',
+                'orderQty': 228,
+                'price': 1000.0,
+                'symbol': settings.TEST_SYMBOL
+            },
+            {
+                'ordType': 'Limit',
+                'orderQty': 229,
+                'price': 1001.0,
+                'symbol': settings.TEST_SYMBOL
+            }
+
+        ]
         with responses.RequestsMock() as rsps:
             rsps.add(
                 responses.POST,
                 settings.BASE_URL + '/order/bulk',
-                json=[{}, {}]
+                json=[{'orderID': 123}, {'orderID': 124}]
             )
-            self.exchange.bulk_place_orders(order1, order2)
-            self.assertEqual(json.dumps({'orders': [order1, order2]}), rsps.calls[0].request.body)
+            self.exchange.bulk_place_orders(orders=[order1, order2])
+            self.assertEqual(json.dumps({'orders': expected_orders}), rsps.calls[0].request.body)

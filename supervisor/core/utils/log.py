@@ -1,7 +1,7 @@
 import logging
 
 
-def setup_custom_logger(name, log_level=logging.INFO):
+def setup_custom_logger(name, log_level=logging.DEBUG):
     formatter = logging.Formatter(fmt='%(asctime)s - %(levelname)s - %(module)s - %(message)s')
 
     handler = logging.StreamHandler()

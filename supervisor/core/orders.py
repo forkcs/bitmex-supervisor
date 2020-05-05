@@ -1,3 +1,4 @@
+from typing import Callable
 from decimal import Decimal
 
 
@@ -14,7 +15,7 @@ class Order:
                  reduce_only: bool = False,
                  passive: bool = False):
 
-        self.order_id: str = ''
+        self.order_id = None
         self.order_type = order_type
         self.clordid = clordid
         self.qty = qty
@@ -26,12 +27,20 @@ class Order:
         self.reduce_only = reduce_only
         self.passive = passive
 
+        self._callbacks = []
+
     def __eq__(self, other):
         """Custom == for use 'order in orders' expressions."""
 
         if self.get_comparison_params() == other.get_comparison_params():
             return True
         return False
+
+    def add_callback(self, callback: Callable) -> None:
+        self._callbacks.append(callback)
+
+    def clear_callbacks(self) -> None:
+        self._callbacks.clear()
 
     def is_valid(self) -> bool:
         """Validate order parameters for common errors.
@@ -48,20 +57,17 @@ class Order:
         # stop-loss orders must have stop_px
         if self.order_type == 'Stop' and self.stop_px is None:
             return False
-        # order cannot have both price and stop_px
-        if self.price is not None and self.stop_px is not None:
-            return False
         # price must be positive
-        if self.price is not None and self.price <= 0:
+        if self.price is not None and self.price < 0:
             return False
         # stop_px must be positive
-        if self.stop_px is not None and self.stop_px <= 0:
+        if self.stop_px is not None and self.stop_px < 0:
             return False
         # for sell orders use side='Sell'
         if self.qty <= 0:
             return False
         # side only can be Buy or Sell
-        if self.side is not None and self.side not in ['Buy', 'Sell']:
+        if self.side not in ['Buy', 'Sell']:
             return False
         return True
 
@@ -141,3 +147,12 @@ class Order:
         new_order.passive = 'ParticipateDoNotInitiate' in order_dict.get('exec_inst', '')
 
         return new_order
+
+    def move(self, to: Decimal) -> None:
+        if self.price is not None:
+            self.price = to
+            return
+        elif self.stop_px is not None:
+            self.stop_px = to
+            return
+        raise RuntimeError('Cannot move order with both stop_px and price are absent.')

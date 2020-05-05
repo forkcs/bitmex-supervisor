@@ -13,14 +13,6 @@ from supervisor.core.utils.math import toNearest
 from urllib.parse import urlparse, urlunparse
 
 
-# Connects to BitMEX websocket for streaming realtime data.
-# The bot still interacts with this as if it were a REST Endpoint, but now it can get
-# much more realtime data without heavily polling the API.
-#
-# The Websocket offers a bunch of data as raw properties right on the object.
-# On connect, it synchronously asks for a push of all this data then returns.
-# Right after, the bot can start using its data. It will be updated in realtime, so the bot can
-# poll as often as it wants.
 class BitMEXWebsocket:
 
     # Don't grow a table larger than this amount. Helps cap memory usage.

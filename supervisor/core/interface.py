@@ -1,8 +1,12 @@
 from supervisor.core.api import BitMEX
+from supervisor.core.orders import Order
 
 
 class Exchange:
-    """High-level BitMEX API interface."""
+    """High-level BitMEX API interface.
+
+    Operates with Order objects
+    """
 
     def __init__(self, symbol, api_key, api_secret, test=False, connect_ws=True):
         self.symbol = symbol
@@ -64,61 +68,54 @@ class Exchange:
     #
 
     def get_open_orders_ws(self):
-        return self.conn.open_orders()
+        return [Order.from_dict(o) for o in self.conn.open_orders()]
 
     def get_filled_orders_ws(self):
-        return self.conn.filled_orders()
+        return [Order.from_dict(o) for o in self.conn.filled_orders()]
 
-    def get_order_ws(self, clordid):
+    def get_order_by_clordid_ws(self, clordid):
         orders = self.conn.get_orders()
         orders = list(filter(lambda x: x['clOrdID'] == clordid, orders))
         if len(orders) == 1:
-            return orders[0]
-        return {}
+            return Order.from_dict(orders[0])
+        return None
 
-    def get_order_status_ws(self, clordid):
+    def get_order_status_ws(self, order):
         orders = self.conn.get_orders()
-        orders = list(filter(lambda x: x['clOrdID'] == clordid, orders))
+        orders = list(filter(lambda x: x.get('orderID', None) == order.order_id, orders))
         if len(orders) == 1:
             return orders[0].get('ordStatus')
         elif len(orders) == 0:
-            return ''
+            return None
 
     def get_order_executions_ws(self, clordid):
         return self.conn.get_executions(clordid=clordid)
 
-    def place_order(self, order_dict=None, qty=None, price=None, exec_inst=None, hidden=False, stop_px=None,
-                    order_type='Market', clordid=''):
-        if order_dict:
-            return self.conn.order_create(**order_dict)
-        if qty == 0:
-            return
-        display_qty = None
-        if hidden and order_type == 'Limit':
-            display_qty = 0
-        return self.conn.order_create(orderQty=qty, price=price, ordType=order_type, displayQty=display_qty,
-                                      clOrdID=clordid, execInst=exec_inst, stopPx=stop_px)
+    def place_order(self, order):
+        new_order = self.conn.order_create(**order.as_dict())
+        order.order_id = new_order.get('orderID', '')
 
     def bulk_place_orders(self, orders):
-        for o in orders:
-            o['symbol'] = self.symbol
-        return self.conn.order_bulk_create(orders=orders)
+        order_dicts = [order.as_dict() for order in orders]
+        for order_dict in order_dicts:
+            order_dict.update(symbol=self.symbol)
 
-    def cancel_order(self, *, clordid=None, order_id=None):
-        if clordid is not None:
-            self.conn.order_cancel(clOrdID=clordid)
-        elif order_id is not None:
-            self.conn.order_cancel(orderID=order_id)
+        response = self.conn.order_bulk_create(order_dicts)
+        for order_dict, order in zip(response, orders):
+            order.order_id = order_dict['orderID']
+
+    def cancel_order(self, order):
+        if order.clordid is not None:
+            self.conn.order_cancel(clOrdID=order.clordid)
+        elif order.order_id is not None:
+            self.conn.order_cancel(orderID=order.order_id)
         else:
             raise ValueError('clordid or order id must be given.')
 
-    def bulk_cancel_orders(self, *, clordid_list=None, order_id_list=None):
-        if clordid_list:
-            self.conn.order_cancel(clOrdID=clordid_list)
-        elif order_id_list:
-            self.conn.order_cancel(orderID=order_id_list)
-        else:
-            raise ValueError('clordid list or order id list must be given.')
+    def bulk_cancel_orders(self, orders):
+        clordid_list = [o.clordid for o in orders if o.clordid is not None]
+        order_id_list = [o.order_id for o in orders if o.order_id is not None]
+        self.conn.order_cancel(orderID=order_id_list, clOrdID=clordid_list)
 
     def cancel_all_orders(self):
         self.conn.order_cancel_all()
