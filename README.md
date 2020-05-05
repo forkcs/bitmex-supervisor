@@ -1,17 +1,19 @@
 # BitMEX Supervisor
 
 This is a library-like application, which operates with orders and positions on your account.
+
 **Current version: 0.1, in development**
 #### Features:
-* Creating an cancelling orders on yout account. Stop-loss, Limit, passive, reduce-only, close-only, hidden orders supported.
-* Prevent these orders for being lost, cancelled or rejected: Supervisor will place them anew.
-* Supervisor may close all orders, which are not supervised.
-* If the supervised order is filled, Supervisor will not try to place it. 
+* Creating an cancelling orders on your account. Stop-loss, Limit, passive, reduce-only, close-only, hidden orders supported.
+* Preventing these orders for being lost, cancelled or rejected: Supervisor will place them anew.
+* Supervisor closes all orders, which are not supervised.
+* When the supervised order has been filled, Supervisor will not try to place it. 
 #### In develop:
 * Manage positions on your account.
     * Maintaining position size.
     * Various market-price or limit entries in position.
     * Enter position with rebate by tracking last market price and moving limit order up.
+* Put callbacks on supervised orders, which are called when order has been filled, partially executed or cancelled.
 
 ## Getting Started
 
