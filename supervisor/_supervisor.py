@@ -1,7 +1,7 @@
-from decimal import Decimal
-from threading import Thread, Event
 from time import sleep
 from typing import Callable
+from decimal import Decimal
+from threading import Thread, Event
 
 from supervisor.core.orders import Order
 
@@ -73,10 +73,8 @@ class Supervisor:
     ###################
 
     def run_cycle(self):
-        # reset control event
-        self._exit_sync_thread.clear()
+        """Start thread or continue the existing."""
 
-        # start thread or continue the existing
         if self.sync_thread.is_alive():
             self._continue_cycle()
         else:
@@ -97,11 +95,9 @@ class Supervisor:
         # if cycle cannot reach exit_sync_thread check, release it
         if self._stopped:
             self._continue_cycle()
+
         # join if sync thread isn`t terminated yet
-        try:
-            self.sync_thread.join()
-        except RuntimeError:
-            pass
+        self.sync_thread.join()
 
     def reset(self):
         self.stop_cycle()
