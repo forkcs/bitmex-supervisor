@@ -4,7 +4,44 @@ from decimal import Decimal
 from supervisor.core.orders import Order
 
 
-class OrderCRUDTests(unittest.TestCase):
+class OrderEditingTests(unittest.TestCase):
+
+    def test_add_clear_callback(self):
+        def callback(): pass
+        def callback2(): pass
+        order = Order(qty=228, side='Buy', price=Decimal(1000))
+        order.add_callback(callback)
+        self.assertListEqual([callback], order._callbacks)
+
+        order.add_callback(callback2)
+        self.assertListEqual([callback, callback2], order._callbacks)
+
+        order.clear_callbacks()
+        self.assertListEqual([], order._callbacks)
+
+    def test_move_limit_order(self):
+        order = Order(order_type='Limit', qty=228, side='Buy', price=Decimal(1000))
+        order.move(to=Decimal(1001))
+        self.assertEqual(Decimal(1001), order.price)
+
+    def test_move_stop_order(self):
+        order = Order(order_type='Stop', qty=228, side='Buy', stop_px=Decimal(1000))
+        order.move(to=Decimal(1001))
+        self.assertEqual(Decimal(1001), order.stop_px)
+
+    def test_move_bad_order(self):
+        # Nothing to move: no price or stop_px
+        order = Order(order_type='Stop', qty=228, side='Buy')
+        with self.assertRaises(RuntimeError):
+            order.move(to=Decimal(1234))
+
+    def test_move_with_bad_argument(self):
+        order = Order(order_type='Limit', qty=228, side='Buy', price=Decimal(1000))
+        with self.assertRaises(TypeError):
+            order.move(to=1001)
+
+
+class OrderValidationTests(unittest.TestCase):
 
     def test_add_full_order(self):
         order = Order(
@@ -27,19 +64,6 @@ class OrderCRUDTests(unittest.TestCase):
     def test_make_order_with_no_order_type(self):
         order = Order(qty=228, side='Buy', price=Decimal(1000))
         self.assertFalse(order.is_valid())
-
-    def test_add_clear_callback(self):
-        def callback(): pass
-        def callback2(): pass
-        order = Order(qty=228, side='Buy', price=Decimal(1000))
-        order.add_callback(callback)
-        self.assertListEqual([callback], order._callbacks)
-
-        order.add_callback(callback2)
-        self.assertListEqual([callback, callback2], order._callbacks)
-
-        order.clear_callbacks()
-        self.assertListEqual([], order._callbacks)
 
     def test_make_limit_order_with_stop_px(self):
         order = Order(order_type='Limit', qty=228, stop_px=Decimal(1000))
@@ -64,27 +88,6 @@ class OrderCRUDTests(unittest.TestCase):
     def test_make_limit_order_with_bad_side(self):
         order = Order(order_type='Limit', qty=228, side='Bad side', price=Decimal(1000))
         self.assertFalse(order.is_valid())
-
-    def test_move_limit_order(self):
-        order = Order(order_type='Limit', qty=228, side='Buy', price=Decimal(1000))
-        order.move(to=Decimal(1001))
-        self.assertEqual(Decimal(1001), order.price)
-
-    def test_move_stop_order(self):
-        order = Order(order_type='Stop', qty=228, side='Buy', stop_px=Decimal(1000))
-        order.move(to=Decimal(1001))
-        self.assertEqual(Decimal(1001), order.stop_px)
-
-    def test_move_bad_order(self):
-        # Nothing to move: no price or stop_px
-        order = Order(order_type='Stop', qty=228, side='Buy')
-        with self.assertRaises(RuntimeError):
-            order.move(to=Decimal(1234))
-
-    def test_move_with_bad_argument(self):
-        order = Order(order_type='Limit', qty=228, side='Buy', price=Decimal(1000))
-        with self.assertRaises(TypeError):
-            order.move(to=1001)
 
     def test_make_correct_stop_order(self):
         order = Order(order_type='Stop', qty=228, side='Sell', stop_px=Decimal(1000))
