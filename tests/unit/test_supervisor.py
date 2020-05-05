@@ -1,22 +1,20 @@
 import unittest
+from unittest.mock import Mock
 from decimal import Decimal
 
 from supervisor import Supervisor
-from supervisor.core import settings
 from supervisor.core.orders import Order
-from supervisor.core.interface import Exchange
 
 
 class SupervisorCycleTests(unittest.TestCase):
 
     def setUp(self) -> None:
-        self.exchange = Exchange(symbol=settings.TEST_SYMBOL, api_key=settings.TEST_API_KEY,
-                                 api_secret=settings.TEST_API_SECRET, test=True, connect_ws=False)
-        self.supervisor = Supervisor(interface=self.exchange)
+        self.exchange_mock = Mock()
+        self.exchange_mock.get_open_orders_ws.return_value = []
+        self.supervisor = Supervisor(interface=self.exchange_mock)
 
     def tearDown(self) -> None:
         self.supervisor.exit_cycle()
-        self.exchange.exit()
 
     def test_run_cycle(self):
         self.supervisor.run_cycle()
@@ -69,19 +67,22 @@ class SupervisorCycleTests(unittest.TestCase):
 class SupervisorOrdersTests(unittest.TestCase):
 
     def setUp(self) -> None:
-        self.exchange = Exchange(symbol=settings.TEST_SYMBOL, api_key=settings.TEST_API_KEY,
-                                 api_secret=settings.TEST_API_SECRET, test=True, connect_ws=False)
-        self.supervisor = Supervisor(interface=self.exchange)
+        self.exchange_mock = Mock()
+        self.exchange_mock.get_open_orders_ws.return_value = []
+        self.supervisor = Supervisor(interface=self.exchange_mock)
 
     def tearDown(self) -> None:
         self.supervisor.exit_cycle()
-        self.exchange.exit()
 
     def test_add_order(self):
         new_order = Order(order_type='Limit', qty=228, price=Decimal(1000), side='Buy')
         self.supervisor.add_order(new_order)
 
         self.assertIn(new_order, self.supervisor._orders)
+
+    def test_add_empty_order(self):
+        with self.assertRaises(ValueError):
+            self.supervisor.add_order(Order())
 
     def test_add_order_with_callback(self):
         def callback(): pass
@@ -115,3 +116,34 @@ class SupervisorOrdersTests(unittest.TestCase):
         self.assertIn(new_order, self.supervisor._orders)
         # assert that order was moved
         self.assertEqual(Decimal(1001), new_order.price)
+
+
+class SupervisorTests(unittest.TestCase):
+
+    def setUp(self) -> None:
+        self.exchange_mock = Mock()
+        self.exchange_mock.get_open_orders_ws.return_value = []
+        self.supervisor = Supervisor(interface=self.exchange_mock)
+
+    def tearDown(self) -> None:
+        self.supervisor.exit_cycle()
+
+    def test_cancel_needless_order(self):
+        order1 = Order()
+        self.exchange_mock.get_open_orders_ws.return_value = [order1]
+        expected_orders = [order1]
+        self.supervisor.cancel_needless_orders()
+
+        # assert that Supervisor try to cancel needless order
+        self.exchange_mock.bulk_cancel_orders.assert_called_once_with(expected_orders)
+
+    def test_cancel_several_needless_orders(self):
+        order1 = Order()
+        order2 = Order()
+        order3 = Order()
+        self.exchange_mock.get_open_orders_ws.return_value = [order1, order2, order3]
+        expected_orders = [order1, order2, order3]
+        self.supervisor.cancel_needless_orders()
+
+        # assert that Supervisor try to cancel needless order
+        self.exchange_mock.bulk_cancel_orders.assert_called_once_with(expected_orders)

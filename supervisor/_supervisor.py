@@ -40,9 +40,35 @@ class Supervisor:
             sleep(0.1)
 
     def sync_orders(self):
+        self.cancel_needless_orders()
+        self.check_needed_orders()
+
+    def check_needed_orders(self):
+        orders_to_place = []
         for order in self._orders:
             if order.order_id is None:
-                pass
+                orders_to_place.append(order)
+            else:
+                status = self.exchange.get_order_status(order)
+                if status == 'Filled':
+                    self._orders.remove(order)
+                elif status == 'Canceled':
+                    orders_to_place.append(order)
+                elif status == 'Rejected':
+                    self._orders.remove(order)
+        if len(orders_to_place) == 1:
+            self.exchange.place_order(orders_to_place[0])
+        elif len(orders_to_place) > 1:
+            self.exchange.bulk_place_orders(orders_to_place)
+
+    def cancel_needless_orders(self):
+        real_orders = self.exchange.get_open_orders_ws()
+        orders_to_cancel = []
+        for o in real_orders:
+            if o not in self._orders:
+                orders_to_cancel.append(o)
+        if len(orders_to_cancel) > 0:
+            self.exchange.bulk_cancel_orders(orders_to_cancel)
 
     def sync_position(self):
         raise NotImplemented
@@ -57,6 +83,8 @@ class Supervisor:
     def add_order(self, order: Order, callback: Callable = None) -> None:
         if order.is_valid():
             self._orders.append(order)
+        else:
+            raise ValueError('Order is not valid.')
         # add callback to order dict
         if callback is not None:
             order.add_callback(callback)
