@@ -37,7 +37,7 @@ class Supervisor:
             else:
                 self._stopped.set()
                 self._run_thread.wait()
-            sleep(1)
+            sleep(0.1)
 
     def sync_orders(self):
         for order in self._orders:
@@ -90,6 +90,7 @@ class Supervisor:
 
     def _continue_cycle(self):
         self._run_thread.set()
+        self._stopped.clear()
 
     def exit_cycle(self):
         self._exit_sync_thread.set()
