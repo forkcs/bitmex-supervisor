@@ -62,7 +62,9 @@ class Supervisor:
             order.add_callback(callback)
 
     def remove_order(self, order: Order):
-        self._orders.remove(order)
+        if order in self._orders:
+            order.clear_callbacks()
+            self._orders.remove(order)
 
     def move_order(self, order: Order, to: Decimal):
         if order in self._orders:
@@ -97,7 +99,8 @@ class Supervisor:
             self._continue_cycle()
 
         # join if sync thread isn`t terminated yet
-        self.sync_thread.join()
+        if self.sync_thread.is_alive():
+            self.sync_thread.join()
 
     def reset(self):
         self.stop_cycle()
