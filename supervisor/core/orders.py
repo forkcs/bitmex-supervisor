@@ -104,9 +104,11 @@ class Order:
         if self.side is not None or include_empty:
             order_dict['side'] = self.side
         if self.price is not None or include_empty:
-            order_dict['price'] = float(self.price)  # float(Decimal) for json.dumps works correctly
+            # float(Decimal) for json.dumps works correctly
+            order_dict['price'] = float(self.price) if self.price is not None else None
         if self.stop_px is not None or include_empty:
-            order_dict['stopPx'] = float(self.stop_px)  # float(Decimal) for json.dumps works correctly
+            # float(Decimal) for json.dumps works correctly
+            order_dict['stopPx'] = float(self.stop_px) if self.stop_px is not None else None
         if self.hidden:
             order_dict['displayQty'] = 0
         if self.close:
@@ -114,7 +116,7 @@ class Order:
         if self.reduce_only:
             exec_inst.append('ReduceOnly')
         if self.passive:
-            exec_inst.append('ParticipleDoNotInitiate')
+            exec_inst.append('ParticipateDoNotInitiate')
 
         if exec_inst or include_empty:
             exec_inst_str = ','.join(exec_inst)
@@ -142,13 +144,15 @@ class Order:
 
         new_order.hidden = order_dict.get('displayQty', None) == 0
 
-        new_order.close = 'Close' in order_dict.get('exec_inst', '')
-        new_order.reduce_only = 'ReduceOnly' in order_dict.get('exec_inst', '')
-        new_order.passive = 'ParticipateDoNotInitiate' in order_dict.get('exec_inst', '')
+        new_order.close = 'Close' in order_dict.get('execInst', '')
+        new_order.reduce_only = 'ReduceOnly' in order_dict.get('execInst', '')
+        new_order.passive = 'ParticipateDoNotInitiate' in order_dict.get('execInst', '')
 
         return new_order
 
     def move(self, to: Decimal) -> None:
+        if type(to) is not Decimal:
+            raise TypeError('Attribute to must be a Decimal instance.')
         if self.price is not None:
             self.price = to
             return
