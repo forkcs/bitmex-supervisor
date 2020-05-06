@@ -59,7 +59,7 @@ Coming soon...
 
 Coming soon...
 
-#### After successful installation:
+### After successful installation:
 
 Now you can import supervisor module from project dir:
 ```python
