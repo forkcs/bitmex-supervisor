@@ -59,6 +59,24 @@ Coming soon...
 
 Coming soon...
 
+## Running the tests
+
+There are automated tests for this project. Running the tests is optional. For run tests you need to install py.test and responses packages.
+
+Install with pip:
+
+```commandline
+pip install pytest responses
+```
+
+Run tests:
+
+```commandline
+pytest
+```
+
+**If all the tests are passed, you may proceed to the next steps.**
+
 ### After successful installation:
 
 Now you can import supervisor module from project dir:
