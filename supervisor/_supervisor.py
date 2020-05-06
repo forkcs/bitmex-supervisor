@@ -2,6 +2,7 @@ from time import sleep
 from typing import Callable
 from decimal import Decimal
 from threading import Thread, Event
+from requests.exceptions import HTTPError
 
 from supervisor.core.orders import Order
 
@@ -56,10 +57,14 @@ class Supervisor:
                     orders_to_place.append(order)
                 elif status == 'Rejected':
                     self._orders.remove(order)
-        if len(orders_to_place) == 1:
-            self.exchange.place_order(orders_to_place[0])
-        elif len(orders_to_place) > 1:
-            self.exchange.bulk_place_orders(orders_to_place)
+        try:
+            if len(orders_to_place) == 1:
+                self.exchange.place_order(orders_to_place[0])
+            elif len(orders_to_place) > 1:
+                self.exchange.bulk_place_orders(orders_to_place)
+        except HTTPError as e:
+            if 'Order price is above the liquidation price of current' in e.response.text:
+                self._orders.remove(orders_to_place[0])
 
     def cancel_needless_orders(self):
         real_orders = self.exchange.get_open_orders_ws()
