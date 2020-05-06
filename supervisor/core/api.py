@@ -1134,7 +1134,6 @@ class BitMEX(object):
                 exit(1)
 
         def retry():
-            self.retries += 1
             if self.retries > max_retries:
                 raise errors.MaxRetriesReachedError("Max retries on %s (%s) hit, raising." % (path, json.dumps(postdict or '')))
             return self.call_api(path, query, postdict, timeout, verb, rethrow_errors, max_retries)
@@ -1143,6 +1142,8 @@ class BitMEX(object):
         response = None
         try:
             data = json.dumps(postdict, cls=DecimalEncoder)
+            if data == 'null':
+                data = ''
             self.logger.info("sending req to %s: %s" % (url, data or query or ''))
             req = requests.Request(verb, url, data=data, auth=auth, params=query, )
             prepped = self.session.prepare_request(req)

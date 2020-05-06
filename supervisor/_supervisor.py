@@ -49,7 +49,7 @@ class Supervisor:
             if order.order_id is None:
                 orders_to_place.append(order)
             else:
-                status = self.exchange.get_order_status(order)
+                status = self.exchange.get_order_status_ws(order)
                 if status == 'Filled':
                     self._orders.remove(order)
                 elif status == 'Canceled':
