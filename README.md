@@ -29,19 +29,43 @@ Pyhton 3.8 +
 
 ### Installing
 
-Clone and install manually:
+#### Manual install from repo
+
+Clone and go to directory:
 
 ```commandline
 git clone https://github.com/forkcs/bitmex-supervisor.git
 cd bitmex-supervisor/
 ```
 
-Install Supervisor from sources:
+Then create and activate a virtual environment:
+
 ```commandline
-python setup.py install
+python3 -m venv venv
+source venv/bin/activate
 ```
 
-End with an example of getting some data out of the system or using it for a little demo
+Install project requirements:
+
+```commandline
+pip install -r requirements.txt
+```
+
+#### Install with pip
+
+Coming soon...
+
+#### Install from sources
+
+Coming soon...
+
+#### After successful installation:
+
+Now you can import supervisor module from project dir:
+```python
+import supervisor
+```
+For more details see example.py.
 
 ### Contributing
 
