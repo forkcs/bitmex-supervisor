@@ -41,10 +41,23 @@ class Supervisor:
             sleep(0.1)
 
     def sync_orders(self):
+        """ All the synchronization logic should be here."""
+
+        # cancel orders at first, it`s important
         self.cancel_needless_orders()
+        # dealing with orders from self._orders
         self.check_needed_orders()
 
     def check_needed_orders(self):
+        """Check ever order from self._orders.
+
+        If order has no order id, it`s considered as unplaced, so try to place them.
+        If order has order id, but isn`t actually placed, there are 3 cases:
+            - order is cancelled. Then we try to place it anew;
+            - order is rejected. It`s useless to try placing it, so forget this order;
+            - order is filled. We needn`t place it anymore, so just forget this order.
+        """
+
         orders_to_place = []
         for order in self._orders:
             if order.order_id is None:
@@ -74,12 +87,6 @@ class Supervisor:
                 orders_to_cancel.append(o)
         if len(orders_to_cancel) > 0:
             self.exchange.bulk_cancel_orders(orders_to_cancel)
-
-    def sync_position(self):
-        raise NotImplemented
-
-    def check_orders_status(self):
-        raise NotImplemented
 
     ##########
     # Orders #

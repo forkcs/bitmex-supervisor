@@ -1,6 +1,7 @@
 import unittest
-from unittest.mock import Mock
+import requests
 from decimal import Decimal
+from unittest.mock import Mock
 
 from supervisor import Supervisor
 from supervisor.core.orders import Order
@@ -118,7 +119,8 @@ class SupervisorOrdersTests(unittest.TestCase):
         self.assertEqual(Decimal(1001), new_order.price)
 
 
-class SupervisorTests(unittest.TestCase):
+class OrderPlaceCancelMethodsTests(unittest.TestCase):
+    """All methods that associated with placing and cancelling orders in cycle."""
 
     def setUp(self) -> None:
         self.exchange_mock = Mock()
@@ -147,3 +149,84 @@ class SupervisorTests(unittest.TestCase):
 
         # assert that Supervisor try to cancel needless order
         self.exchange_mock.bulk_cancel_orders.assert_called_once_with(expected_orders)
+
+    def test_check_unplaced_order(self):
+        order = Order(order_type='Limit', qty=228, price=Decimal(1000), side='Buy')
+        self.supervisor.add_order(order)
+        self.supervisor.check_needed_orders()
+
+        self.exchange_mock.place_order.assert_called_once_with(order)
+
+    def test_check_several_unplaced_orders(self):
+        order1 = Order(order_type='Limit', qty=228, price=Decimal(1001), side='Buy')
+        order2 = Order(order_type='Limit', qty=229, price=Decimal(1002), side='Buy')
+        order3 = Order(order_type='Limit', qty=2210, price=Decimal(1003), side='Buy')
+        self.supervisor.add_order(order1)
+        self.supervisor.add_order(order2)
+        self.supervisor.add_order(order3)
+        self.supervisor.check_needed_orders()
+
+        self.exchange_mock.bulk_place_orders.assert_called_once_with([order1, order2, order3])
+
+    def test_check_canceled_order(self):
+        def order_status_mock(_order):
+            if _order == order:
+                return 'Canceled'
+
+        self.exchange_mock.get_order_status_ws.side_effect = order_status_mock
+
+        order = Order(order_type='Limit', qty=228, price=Decimal(1000), side='Buy')
+        order.order_id = '1234'
+        self.supervisor.add_order(order)
+
+        self.supervisor.check_needed_orders()
+        self.exchange_mock.place_order.assert_called_once_with(order)
+
+    def test_check_rejected_order(self):
+        def order_status_mock(_order):
+            if _order == order:
+                return 'Rejected'
+
+        self.exchange_mock.get_order_status_ws.side_effect = order_status_mock
+
+        order = Order(order_type='Limit', qty=228, price=Decimal(1000), side='Buy')
+        order.order_id = '1234'
+        self.supervisor.add_order(order)
+        self.supervisor.check_needed_orders()
+
+        # assert that we didn`t place this order
+        self.exchange_mock.place_order.not_called(order)
+        # assert that Supervisor forget this order
+        self.assertNotIn(order, self.supervisor._orders)
+
+    def test_check_filled_order(self):
+        def order_status_mock(_order):
+            if _order == order:
+                return 'Filled'
+
+        self.exchange_mock.get_order_status_ws.side_effect = order_status_mock
+
+        order = Order(order_type='Limit', qty=228, price=Decimal(1000), side='Buy')
+        order.order_id = '1234'
+        self.supervisor.add_order(order)
+        self.supervisor.check_needed_orders()
+
+        # assert that we didn`t place this order
+        self.exchange_mock.place_order.not_called(order)
+        # assert that Supervisor forget this order
+        self.assertNotIn(order, self.supervisor._orders)
+
+    def test_validation_error_while_placing_order(self):
+        validation_error = requests.HTTPError()
+        validation_error.response = Mock()
+        validation_error.response.text = 'Order price is above the liquidation price of current'
+        self.exchange_mock.place_order.side_effect = validation_error
+
+        order = Order(order_type='Limit', qty=228, price=Decimal(1000), side='Buy')
+        self.supervisor.add_order(order)
+        self.supervisor.check_needed_orders()
+
+        # assert that method has been called
+        self.exchange_mock.place_order.assert_called_once_with(order)
+        # assert that we catch the exception and forget the order
+        self.assertNotIn(order, self.supervisor._orders)
