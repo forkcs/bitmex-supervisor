@@ -121,7 +121,9 @@ my_order = Order(order_type='Limit', qty=100, side='Buy', price=Decimal(6500), h
 supervisor.add_order(my_order)
 ```
 
-You can attach any callback to order events:
+You can attach any callback to order events.
+
+Callback must retrieve *args and **kwargs attributes.
 
 ```python
 order_with_callback = Order(order_type='Limit', qty=100, side='Buy', price=Decimal(6500))
@@ -132,6 +134,14 @@ def callback(*args, **kwargs):
 order._on_fill = callback
 
 # Run cycle and when your order filled, the message will be printed.
+```
+
+There are 3 possible events provided:
+
+```python
+Order._on_fill: Callable
+Order._on_reject: Callable
+Order._on_cancel: Callable
 ```
 
 Run Supervisor cycle (works in own thread):
