@@ -12,9 +12,9 @@ if __name__ == '__main__':
                         test=True, symbol='XBTUSD')
     supervisor = Supervisor(interface=exchange)
 
-    stop_loss = Order(order_type='Stop', stop_px=Decimal(8800), qty=10, side='Sell')
-    tp1 = Order(order_type='Limit', price=Decimal(9100), qty=6, side='Sell')
-    tp2 = Order(order_type='Limit', price=Decimal(9200), qty=4, side='Sell')
+    stop_loss = Order(order_type='Stop', stop_px=Decimal(2000), qty=10, side='Sell')
+    tp1 = Order(order_type='Limit', price=Decimal(15000), qty=6, side='Sell')
+    tp2 = Order(order_type='Limit', price=Decimal(20000), qty=4, side='Sell')
 
     input('Enter to run cycle')
     supervisor.run_cycle()
