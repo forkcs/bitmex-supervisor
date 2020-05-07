@@ -53,7 +53,9 @@ pip install -r requirements.txt
 
 #### Install with pip
 
-Coming soon...
+```python
+pip install bitmex-supervisor
+```
 
 #### Install from sources
 
