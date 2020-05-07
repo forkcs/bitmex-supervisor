@@ -13,8 +13,12 @@ if __name__ == '__main__':
     supervisor = Supervisor(interface=exchange)
 
     stop_loss = Order(order_type='Stop', stop_px=Decimal(2000), qty=10, side='Sell')
-    tp1 = Order(order_type='Limit', price=Decimal(15000), qty=6, side='Sell')
-    tp2 = Order(order_type='Limit', price=Decimal(20000), qty=4, side='Sell')
+    tp1 = Order(order_type='Limit', price=Decimal(15000), qty=6, side='Sell', passive=True, reduce_only=True)
+    tp2 = Order(order_type='Limit', price=Decimal(20000), qty=4, side='Sell', hidden=True)
+
+    stop_loss._on_reject = lambda: print('Rejected')
+    stop_loss._on_fill = lambda: print('We lost position(')
+    stop_loss._on_cancel = lambda: print('Trading without stops is risking ;)')
 
     input('Enter to run cycle')
     supervisor.run_cycle()

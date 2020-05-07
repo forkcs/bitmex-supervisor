@@ -2,18 +2,18 @@
 
 This is a library-like application, which operates with orders and positions on your account.
 
-**Current version: 0.1, in development**
+**Current version: 0.2**
 #### Features:
 * Creating an cancelling orders on your account. Stop-loss, Limit, passive, reduce-only, close-only, hidden orders supported.
 * Preventing these orders for being lost, cancelled or rejected: Supervisor will place them anew.
 * Supervisor closes all orders, which are not supervised.
 * When the supervised order has been filled, Supervisor will not try to place it. 
+* Put callbacks on supervised orders, which are called when order has been filled, partially executed or cancelled.
 #### In develop:
 * Manage positions on your account.
     * Maintaining position size.
     * Various market-price or limit entries in position.
     * Enter position with rebate by tracking last market price and moving limit order up.
-* Put callbacks on supervised orders, which are called when order has been filled, partially executed or cancelled.
 
 ## Getting Started
 
@@ -121,13 +121,26 @@ my_order = Order(order_type='Limit', qty=100, side='Buy', price=Decimal(6500), h
 supervisor.add_order(my_order)
 ```
 
-Run Supervisor cycle (wors in own thread):
+You can attach any callback to order events:
+
+```python
+order_with_callback = Order(order_type='Limit', qty=100, side='Buy', price=Decimal(6500))
+
+# for example, let's attach callback to order fill event
+def callback(*args, **kwargs):
+    print('Order has been filled!!!')
+order._on_fill = callback
+
+# Run cycle and when your order filled, the message will be printed.
+```
+
+Run Supervisor cycle (works in own thread):
 
 ```python
 supervisor.run_cycle()
 ```
 
-You also can stop, continue and exit Supervisor cycle:
+You can stop, continue and exit Supervisor cycle:
 
 ```python
 supervisor.stop_cycle()
