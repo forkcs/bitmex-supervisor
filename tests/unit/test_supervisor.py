@@ -85,25 +85,9 @@ class SupervisorOrdersTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.supervisor.add_order(Order())
 
-    def test_add_order_with_callback(self):
-        def callback(): pass
-        new_order = Order(order_type='Limit', qty=228, price=Decimal(1000), side='Buy')
-        self.supervisor.add_order(new_order, callback=callback)
-
-        self.assertIn(new_order, self.supervisor._orders)
-        self.assertIn(callback, self.supervisor._orders[0]._callbacks)
-
     def test_remove_order(self):
         new_order = Order(order_type='Limit', qty=228, price=Decimal(1000), side='Buy')
         self.supervisor.add_order(new_order)
-
-        self.supervisor.remove_order(new_order)
-        self.assertNotIn(new_order, self.supervisor._orders)
-
-    def test_remove_orer_with_callback(self):
-        def callback(): pass
-        new_order = Order(order_type='Limit', qty=228, price=Decimal(1000), side='Buy')
-        self.supervisor.add_order(new_order, callback=callback)
 
         self.supervisor.remove_order(new_order)
         self.assertNotIn(new_order, self.supervisor._orders)
@@ -173,24 +157,33 @@ class OrderPlaceCancelMethodsTests(unittest.TestCase):
             if _order == order:
                 return 'Canceled'
 
+        on_cancel_mock = Mock()
+
         self.exchange_mock.get_order_status_ws.side_effect = order_status_mock
 
         order = Order(order_type='Limit', qty=228, price=Decimal(1000), side='Buy')
         order.order_id = '1234'
+        order._on_cancel = on_cancel_mock
         self.supervisor.add_order(order)
 
         self.supervisor.check_needed_orders()
+        # assert that Supervisor place order anew
         self.exchange_mock.place_order.assert_called_once_with(order)
+        # assert that Supervisor call matching callback
+        on_cancel_mock.assert_called_once()
 
     def test_check_rejected_order(self):
         def order_status_mock(_order):
             if _order == order:
                 return 'Rejected'
 
+        on_reject_mock = Mock()
+
         self.exchange_mock.get_order_status_ws.side_effect = order_status_mock
 
         order = Order(order_type='Limit', qty=228, price=Decimal(1000), side='Buy')
         order.order_id = '1234'
+        order._on_reject = on_reject_mock
         self.supervisor.add_order(order)
         self.supervisor.check_needed_orders()
 
@@ -198,16 +191,21 @@ class OrderPlaceCancelMethodsTests(unittest.TestCase):
         self.exchange_mock.place_order.not_called(order)
         # assert that Supervisor forget this order
         self.assertNotIn(order, self.supervisor._orders)
+        # assert that Supervisor call matching callback
+        on_reject_mock.assert_called_once()
 
     def test_check_filled_order(self):
         def order_status_mock(_order):
             if _order == order:
                 return 'Filled'
 
+        on_filled_mock = Mock()
+
         self.exchange_mock.get_order_status_ws.side_effect = order_status_mock
 
         order = Order(order_type='Limit', qty=228, price=Decimal(1000), side='Buy')
         order.order_id = '1234'
+        order._on_fill = on_filled_mock
         self.supervisor.add_order(order)
         self.supervisor.check_needed_orders()
 
@@ -215,6 +213,8 @@ class OrderPlaceCancelMethodsTests(unittest.TestCase):
         self.exchange_mock.place_order.not_called(order)
         # assert that Supervisor forget this order
         self.assertNotIn(order, self.supervisor._orders)
+        # assert that Supervisor call matching callback
+        on_filled_mock.assert_called_once()
 
     def test_validation_error_while_placing_order(self):
         validation_error = requests.HTTPError()

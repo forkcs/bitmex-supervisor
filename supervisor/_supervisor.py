@@ -66,10 +66,13 @@ class Supervisor:
                 status = self.exchange.get_order_status_ws(order)
                 if status == 'Filled':
                     self._orders.remove(order)
+                    order.on_fill()
                 elif status == 'Canceled':
                     orders_to_place.append(order)
+                    order.on_cancel()
                 elif status == 'Rejected':
                     self._orders.remove(order)
+                    order.on_reject()
         try:
             if len(orders_to_place) == 1:
                 self.exchange.place_order(orders_to_place[0])
@@ -97,13 +100,9 @@ class Supervisor:
             self._orders.append(order)
         else:
             raise ValueError('Order is not valid.')
-        # add callback to order dict
-        if callback is not None:
-            order.add_callback(callback)
 
     def remove_order(self, order: Order):
         if order in self._orders:
-            order.clear_callbacks()
             self._orders.remove(order)
 
     def move_order(self, order: Order, to: Decimal):

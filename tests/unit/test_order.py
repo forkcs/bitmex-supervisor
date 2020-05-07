@@ -6,19 +6,6 @@ from supervisor.core.orders import Order
 
 class OrderEditingTests(unittest.TestCase):
 
-    def test_add_clear_callback(self):
-        def callback(): pass
-        def callback2(): pass
-        order = Order(qty=228, side='Buy', price=Decimal(1000))
-        order.add_callback(callback)
-        self.assertListEqual([callback], order._callbacks)
-
-        order.add_callback(callback2)
-        self.assertListEqual([callback, callback2], order._callbacks)
-
-        order.clear_callbacks()
-        self.assertListEqual([], order._callbacks)
-
     def test_move_limit_order(self):
         order = Order(order_type='Limit', qty=228, side='Buy', price=Decimal(1000))
         order.move(to=Decimal(1001))
