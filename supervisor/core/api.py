@@ -5,20 +5,11 @@ import datetime
 import json
 import logging
 
-from decimal import Decimal
 from supervisor.core.auth import APIKeyAuthWithExpires
 from supervisor.core.ws_thread import BitMEXWebsocket
 from supervisor.core import settings
 from supervisor.core.utils import errors
 from supervisor.core.utils.log import setup_custom_logger
-
-
-class DecimalEncoder(json.JSONEncoder):
-    """Add decimal encoding support for price operations."""
-    def default(self, obj):
-        if isinstance(obj, Decimal):
-            return float(obj)
-        return json.JSONEncoder.default(self, obj)
 
 
 # https://www.bitmex.com/api/explorer/
@@ -1141,7 +1132,7 @@ class BitMEX(object):
         # Make the request
         response = None
         try:
-            data = json.dumps(postdict, cls=DecimalEncoder)
+            data = json.dumps(postdict)
             if data == 'null':
                 data = ''
             self.logger.info("sending req to %s: %s" % (url, data or query or ''))

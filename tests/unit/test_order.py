@@ -7,23 +7,24 @@ from supervisor.core.orders import Order
 class OrderEditingTests(unittest.TestCase):
 
     def test_move_limit_order(self):
-        order = Order(order_type='Limit', qty=228, side='Buy', price=Decimal(1000))
-        order.move(to=Decimal(1001))
-        self.assertEqual(Decimal(1001), order.price)
+        order = Order(order_type='Limit', qty=228, side='Buy', price=1000)
+        order.move(to=1001)
+        self.assertEqual(1001, order.price)
 
     def test_move_stop_order(self):
-        order = Order(order_type='Stop', qty=228, side='Buy', stop_px=Decimal(1000))
-        order.move(to=Decimal(1001))
-        self.assertEqual(Decimal(1001), order.stop_px)
+        order = Order(order_type='Stop', qty=228, side='Buy', stop_px=1000)
+        order.move(to=1001)
+        self.assertEqual(1001, order.stop_px)
 
     def test_move_bad_order(self):
         # Nothing to move: no price or stop_px
         order = Order(order_type='Stop', qty=228, side='Buy')
         with self.assertRaises(RuntimeError):
-            order.move(to=Decimal(1234))
+            order.move(to=1234)
 
+    @unittest.skip('Decimal prices are obslete')
     def test_move_with_bad_argument(self):
-        order = Order(order_type='Limit', qty=228, side='Buy', price=Decimal(1000))
+        order = Order(order_type='Limit', qty=228, side='Buy', price=1000)
         with self.assertRaises(TypeError):
             order.move(to=1001)
 

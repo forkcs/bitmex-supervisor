@@ -1,5 +1,4 @@
 from typing import Callable
-from decimal import Decimal
 
 
 class Order:
@@ -8,8 +7,8 @@ class Order:
                  clordid: str = None,
                  qty: int = None,
                  side: str = None,
-                 price: Decimal = None,
-                 stop_px: Decimal = None,
+                 price: float = None,
+                 stop_px: float = None,
                  hidden: bool = False,
                  close: bool = False,
                  reduce_only: bool = False,
@@ -144,11 +143,11 @@ class Order:
 
         price = order_dict.get('price', None)
         if price is not None:
-            new_order.price = Decimal(price)
+            new_order.price = price
 
         stop_px = order_dict.get('stopPx', None)
         if stop_px is not None:
-            new_order.stop_px = Decimal(stop_px)
+            new_order.stop_px = stop_px
 
         new_order.hidden = order_dict.get('displayQty', None) == 0
 
@@ -158,9 +157,9 @@ class Order:
 
         return new_order
 
-    def move(self, to: Decimal) -> None:
-        if type(to) is not Decimal:
-            raise TypeError('Attribute to must be a Decimal instance.')
+    def move(self, to: float) -> None:
+        # if type(to) is not float:
+        #     raise TypeError('Attribute to must be a float instance.')
         if self.price is not None:
             self.price = to
             return

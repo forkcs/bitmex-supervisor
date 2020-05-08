@@ -1,7 +1,6 @@
 import json
 import unittest
 import responses
-from decimal import Decimal
 
 from supervisor.core import settings
 from supervisor.core.orders import Order
@@ -59,8 +58,8 @@ class InterfaceHttpMethodsTests(unittest.TestCase):
             self.assertEqual(leverage, 13)
 
     def test_bulk_place_orders(self):
-        order1 = Order(order_type='Limit', price=Decimal(1000), qty=228)
-        order2 = Order(order_type='Limit', price=Decimal(1001), qty=229)
+        order1 = Order(order_type='Limit', price=1000, qty=228)
+        order2 = Order(order_type='Limit', price=1001, qty=229)
 
         expected_orders = [
             {
