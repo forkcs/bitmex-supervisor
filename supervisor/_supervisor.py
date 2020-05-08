@@ -35,10 +35,16 @@ class Supervisor:
             if self._run_thread.is_set():
                 # Synchronize all here
                 self.sync_orders()
+                self.sync_position()
             else:
                 self._stopped.set()
                 self._run_thread.wait()
             sleep(0.1)
+
+    def sync_position(self):
+        pos_size = self.exchange.get_position_size_ws()
+        if pos_size != self.position_size:
+            self.entry(method='Market', qty=self.position_size - pos_size)
 
     def sync_orders(self):
         """ All the synchronization logic should be here."""
@@ -90,6 +96,17 @@ class Supervisor:
                 orders_to_cancel.append(o)
         if len(orders_to_cancel) > 0:
             self.exchange.bulk_cancel_orders(orders_to_cancel)
+
+    ############
+    # Position #
+    ############
+
+    def entry(self, method: str, qty: int) -> None:
+        if method == 'Market':
+            self._entry_by_market_order(qty)
+
+    def _entry_by_market_order(self, qty: int) -> None:
+        self.exchange.place_market_order(qty=qty)
 
     ##########
     # Orders #

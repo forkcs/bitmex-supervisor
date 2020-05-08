@@ -12,6 +12,7 @@ class SupervisorCycleTests(unittest.TestCase):
     def setUp(self) -> None:
         self.exchange_mock = Mock()
         self.exchange_mock.get_open_orders_ws.return_value = []
+        self.exchange_mock.get_position_size_ws.return_value = 0
         self.supervisor = Supervisor(interface=self.exchange_mock)
 
     def tearDown(self) -> None:
@@ -103,12 +104,13 @@ class SupervisorOrdersTests(unittest.TestCase):
         self.assertEqual(Decimal(1001), new_order.price)
 
 
-class OrderPlaceCancelMethodsTests(unittest.TestCase):
+class SyncOrdersTests(unittest.TestCase):
     """All methods that associated with placing and cancelling orders in cycle."""
 
     def setUp(self) -> None:
         self.exchange_mock = Mock()
         self.exchange_mock.get_open_orders_ws.return_value = []
+        self.exchange_mock.get_position_size_ws.return_value = 0
         self.supervisor = Supervisor(interface=self.exchange_mock)
 
     def tearDown(self) -> None:
@@ -230,3 +232,23 @@ class OrderPlaceCancelMethodsTests(unittest.TestCase):
         self.exchange_mock.place_order.assert_called_once_with(order)
         # assert that we catch the exception and forget the order
         self.assertNotIn(order, self.supervisor._orders)
+
+
+class SyncPositionTests(unittest.TestCase):
+
+    def setUp(self) -> None:
+        self.exchange_mock = Mock()
+        self.exchange_mock.get_open_orders_ws.return_value = []
+        self.supervisor = Supervisor(interface=self.exchange_mock)
+
+    def tearDown(self) -> None:
+        self.supervisor.exit_cycle()
+
+    def test_enter_long_position(self):
+        self.exchange_mock.get_position_size_ws.return_value = 0
+        self.supervisor.entry = Mock()
+
+        self.supervisor.position_size = 100
+        self.supervisor.sync_position()
+
+        self.supervisor.entry.assert_called_once_with(method='Market', qty=100)
