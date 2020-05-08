@@ -48,6 +48,9 @@ class Exchange:
     def get_position_size(self):
         return self.conn.position()['currentQty']
 
+    def get_position_size_ws(self):
+        return self.conn.ws.position(self.symbol)['currentQty']
+
     def get_average_position_entry_price(self):
         return self.conn.position()['avgEntryPrice'] or 0
 
@@ -94,6 +97,9 @@ class Exchange:
     def place_order(self, order):
         new_order = self.conn.order_create(**order.as_dict())
         order.order_id = new_order.get('orderID', '')
+
+    def place_market_order(self, qty: int) -> dict:
+        return self.conn.order_create(ordType='Market', orderQty=qty)
 
     def bulk_place_orders(self, orders):
         order_dicts = [order.as_dict() for order in orders]
