@@ -11,6 +11,7 @@ from supervisor.core.auth import generate_expires, generate_signature
 from supervisor.core.utils.log import setup_custom_logger
 from supervisor.core.utils.math import toNearest
 from urllib.parse import urlparse, urlunparse
+from future.utils import iteritems
 
 
 class BitMEXWebsocket:
@@ -98,7 +99,7 @@ class BitMEXWebsocket:
             }
 
         # The instrument has a tickSize. Use it to round values.
-        return {k: toNearest(float(v or 0), instrument['tickSize']) for k, v in iter(ticker)}
+        return {k: toNearest(float(v or 0), instrument['tickSize']) for k, v in iteritems(ticker)}
 
     def funds(self):
         return self.data['margin'][0]
