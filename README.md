@@ -2,7 +2,7 @@
 
 This is a library-like application, which operates with orders and positions on your account.
 
-*Current version:* **0.4.1**
+*Current version:* **0.4.2**
 #### Features:
 * Creating an cancelling orders on your account. Stop-loss, Limit, passive, reduce-only, close-only, hidden orders supported.
 * Preventing these orders for being lost, cancelled or rejected: Supervisor will place them anew.
@@ -120,10 +120,9 @@ supervisor.position = 150
 Create order:
 
 ```python
-from decimal import Decimal
 from supervisor.core.orders import Order
 
-my_order = Order(order_type='Limit', qty=100, side='Buy', price=Decimal(6500), hidden=True, passive=True)
+my_order = Order(order_type='Limit', qty=100, side='Buy', price=6500, hidden=True, passive=True)
 
 supervisor.add_order(my_order)
 ```
@@ -133,7 +132,7 @@ You can attach any callback to order events.
 Callback must retrieve *args and **kwargs attributes.
 
 ```python
-order_with_callback = Order(order_type='Limit', qty=100, side='Buy', price=Decimal(6500))
+order_with_callback = Order(order_type='Limit', qty=100, side='Buy', price=6500)
 
 # for example, let's attach callback to order fill event
 def callback(*args, **kwargs):
