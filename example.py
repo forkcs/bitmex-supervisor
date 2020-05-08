@@ -1,5 +1,3 @@
-from decimal import Decimal
-
 from supervisor.core.interface import Exchange
 from supervisor.core.orders import Order
 from supervisor import Supervisor
@@ -14,9 +12,9 @@ if __name__ == '__main__':
     supervisor = Supervisor(interface=exchange)
 
     # create Order objects
-    stop_loss = Order(order_type='Stop', stop_px=Decimal(2000), qty=10, side='Sell')
-    tp1 = Order(order_type='Limit', price=Decimal(15000), qty=6, side='Sell', passive=True, reduce_only=True)
-    tp2 = Order(order_type='Limit', price=Decimal(20000), qty=4, side='Sell', hidden=True)
+    stop_loss = Order(order_type='Stop', stop_px=2000, qty=10, side='Sell')
+    tp1 = Order(order_type='Limit', price=15000, qty=6, side='Sell', passive=True, reduce_only=True)
+    tp2 = Order(order_type='Limit', price=20000, qty=4, side='Sell', hidden=True)
 
     # set needed position price
     supervisor.position_size = 10
