@@ -70,7 +70,7 @@ class Supervisor:
                 orders_to_place.append(order)
             else:
                 status = self.exchange.get_order_status_ws(order)
-                if status == 'Filled':
+                if status in ['Filled', 'Triggered']:
                     self._orders.remove(order)
                     order.on_fill()
                 elif status == 'Canceled':

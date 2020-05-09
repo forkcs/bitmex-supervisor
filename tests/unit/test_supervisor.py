@@ -1,6 +1,5 @@
 import unittest
 import requests
-from decimal import Decimal
 from unittest.mock import Mock
 
 from supervisor import Supervisor
@@ -77,7 +76,7 @@ class SupervisorOrdersTests(unittest.TestCase):
         self.supervisor.exit_cycle()
 
     def test_add_order(self):
-        new_order = Order(order_type='Limit', qty=228, price=Decimal(1000), side='Buy')
+        new_order = Order(order_type='Limit', qty=228, price=1000, side='Buy')
         self.supervisor.add_order(new_order)
 
         self.assertIn(new_order, self.supervisor._orders)
@@ -87,21 +86,21 @@ class SupervisorOrdersTests(unittest.TestCase):
             self.supervisor.add_order(Order())
 
     def test_remove_order(self):
-        new_order = Order(order_type='Limit', qty=228, price=Decimal(1000), side='Buy')
+        new_order = Order(order_type='Limit', qty=228, price=1000, side='Buy')
         self.supervisor.add_order(new_order)
 
         self.supervisor.remove_order(new_order)
         self.assertNotIn(new_order, self.supervisor._orders)
 
     def test_move_order(self):
-        new_order = Order(order_type='Limit', qty=228, price=Decimal(1000), side='Buy')
+        new_order = Order(order_type='Limit', qty=228, price=1000, side='Buy')
         self.supervisor.add_order(new_order)
 
-        self.supervisor.move_order(new_order, Decimal(1001))
+        self.supervisor.move_order(new_order, 1001)
         # assert that modified object is the same object created before
         self.assertIn(new_order, self.supervisor._orders)
         # assert that order was moved
-        self.assertEqual(Decimal(1001), new_order.price)
+        self.assertEqual(1001, new_order.price)
 
 
 class SyncOrdersTests(unittest.TestCase):
@@ -137,16 +136,16 @@ class SyncOrdersTests(unittest.TestCase):
         self.exchange_mock.bulk_cancel_orders.assert_called_once_with(expected_orders)
 
     def test_check_unplaced_order(self):
-        order = Order(order_type='Limit', qty=228, price=Decimal(1000), side='Buy')
+        order = Order(order_type='Limit', qty=228, price=1000, side='Buy')
         self.supervisor.add_order(order)
         self.supervisor.check_needed_orders()
 
         self.exchange_mock.place_order.assert_called_once_with(order)
 
     def test_check_several_unplaced_orders(self):
-        order1 = Order(order_type='Limit', qty=228, price=Decimal(1001), side='Buy')
-        order2 = Order(order_type='Limit', qty=229, price=Decimal(1002), side='Buy')
-        order3 = Order(order_type='Limit', qty=2210, price=Decimal(1003), side='Buy')
+        order1 = Order(order_type='Limit', qty=228, price=1001, side='Buy')
+        order2 = Order(order_type='Limit', qty=229, price=1002, side='Buy')
+        order3 = Order(order_type='Limit', qty=2210, price=1003, side='Buy')
         self.supervisor.add_order(order1)
         self.supervisor.add_order(order2)
         self.supervisor.add_order(order3)
@@ -163,7 +162,7 @@ class SyncOrdersTests(unittest.TestCase):
 
         self.exchange_mock.get_order_status_ws.side_effect = order_status_mock
 
-        order = Order(order_type='Limit', qty=228, price=Decimal(1000), side='Buy')
+        order = Order(order_type='Limit', qty=228, price=1000, side='Buy')
         order.order_id = '1234'
         order._on_cancel = on_cancel_mock
         self.supervisor.add_order(order)
@@ -183,7 +182,7 @@ class SyncOrdersTests(unittest.TestCase):
 
         self.exchange_mock.get_order_status_ws.side_effect = order_status_mock
 
-        order = Order(order_type='Limit', qty=228, price=Decimal(1000), side='Buy')
+        order = Order(order_type='Limit', qty=228, price=1000, side='Buy')
         order.order_id = '1234'
         order._on_reject = on_reject_mock
         self.supervisor.add_order(order)
@@ -205,7 +204,29 @@ class SyncOrdersTests(unittest.TestCase):
 
         self.exchange_mock.get_order_status_ws.side_effect = order_status_mock
 
-        order = Order(order_type='Limit', qty=228, price=Decimal(1000), side='Buy')
+        order = Order(order_type='Limit', qty=228, price=1000, side='Buy')
+        order.order_id = '1234'
+        order._on_fill = on_filled_mock
+        self.supervisor.add_order(order)
+        self.supervisor.check_needed_orders()
+
+        # assert that we didn`t place this order
+        self.exchange_mock.place_order.not_called(order)
+        # assert that Supervisor forget this order
+        self.assertNotIn(order, self.supervisor._orders)
+        # assert that Supervisor call matching callback
+        on_filled_mock.assert_called_once()
+
+    def test_check_filled_stop_order(self):
+        def order_status_mock(_order):
+            if _order == order:
+                return 'Triggered'
+
+        on_filled_mock = Mock()
+
+        self.exchange_mock.get_order_status_ws.side_effect = order_status_mock
+
+        order = Order(order_type='Stop', qty=228, stop_px=1000, side='Buy')
         order.order_id = '1234'
         order._on_fill = on_filled_mock
         self.supervisor.add_order(order)
@@ -224,7 +245,7 @@ class SyncOrdersTests(unittest.TestCase):
         validation_error.response.text = 'Order price is above the liquidation price of current'
         self.exchange_mock.place_order.side_effect = validation_error
 
-        order = Order(order_type='Limit', qty=228, price=Decimal(1000), side='Buy')
+        order = Order(order_type='Limit', qty=228, price=1000, side='Buy')
         self.supervisor.add_order(order)
         self.supervisor.check_needed_orders()
 

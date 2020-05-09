@@ -22,12 +22,6 @@ class OrderEditingTests(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             order.move(to=1234)
 
-    @unittest.skip('Decimal prices are obslete')
-    def test_move_with_bad_argument(self):
-        order = Order(order_type='Limit', qty=228, side='Buy', price=1000)
-        with self.assertRaises(TypeError):
-            order.move(to=1001)
-
 
 class OrderValidationTests(unittest.TestCase):
 
