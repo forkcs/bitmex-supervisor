@@ -8,7 +8,7 @@ import json
 import decimal
 import logging
 from supervisor.core.auth import generate_expires, generate_signature
-from supervisor.core.utils.log import setup_custom_logger
+from supervisor.core.utils.log import setup_api_logger
 from supervisor.core.utils.math import toNearest
 from urllib.parse import urlparse, urlunparse
 from future.utils import iteritems
@@ -25,7 +25,7 @@ class BitMEXWebsocket:
 
         self.base_url = base_url
 
-        self.logger = logging.getLogger('root')
+        self.logger = logging.getLogger('core')
         self.__reset()
 
     def __del__(self):
@@ -198,7 +198,7 @@ class BitMEXWebsocket:
                                          header=self.__get_auth()
                                          )
 
-        setup_custom_logger('websocket', log_level=logging.INFO)
+        setup_api_logger('websocket', log_level=logging.INFO)
         self.wst = threading.Thread(target=lambda: self.ws.run_forever(sslopt=sslopt_ca_certs))
         self.wst.daemon = True
         self.wst.start()

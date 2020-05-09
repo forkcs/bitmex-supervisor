@@ -9,15 +9,14 @@ from supervisor.core.auth import APIKeyAuthWithExpires
 from supervisor.core.ws_thread import BitMEXWebsocket
 from supervisor.core import settings
 from supervisor.core.utils import errors
-from supervisor.core.utils.log import setup_custom_logger
+from supervisor.core.utils.log import setup_api_logger
 
 
 # https://www.bitmex.com/api/explorer/
 class BitMEX(object):
 
     def __init__(self, test=True, symbol=None, api_key=None, api_secret=None, init_ws=True):
-        self.logger = logging.getLogger('root')
-        setup_custom_logger('root', logging.INFO)
+        self.logger = setup_api_logger('core', logging.INFO)
         self.base_url = settings.BASE_URL if not test else settings.BASE_TEST_URL
         self.symbol = symbol
         self.api_key = api_key
