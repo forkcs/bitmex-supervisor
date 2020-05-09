@@ -10,5 +10,6 @@ setup(
     version=supervisor.__version__,
     packages=['supervisor', 'supervisor.core', 'supervisor.core.auth',
               'supervisor.core.utils'],
-    install_requires=install_requires
+    install_requires=install_requires,
+    url='https://github.com/forkcs/bitmex-supervisor'
 )

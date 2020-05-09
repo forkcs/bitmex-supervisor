@@ -2,7 +2,7 @@
 
 This is a library-like application, which operates with orders and positions on your account.
 
-*Current version:* **0.4.2**
+*Current version:* **0.4.3**
 #### Features:
 * Creating an cancelling orders on your account. Stop-loss, Limit, passive, reduce-only, close-only, hidden orders supported.
 * Preventing these orders for being lost, cancelled or rejected: Supervisor will place them anew.
