@@ -1,4 +1,4 @@
-from typing import Callable
+from threading import Event
 
 
 class Order:
@@ -26,9 +26,9 @@ class Order:
         self.reduce_only = reduce_only
         self.passive = passive
 
-        self._on_reject: Callable = None
-        self._on_cancel: Callable = None
-        self._on_fill: Callable = None
+        self.reject = Event()
+        self.cancel = Event()
+        self.fill = Event()
 
     def __eq__(self, other):
         """Custom == for use 'order in orders' expressions."""
@@ -37,17 +37,14 @@ class Order:
             return True
         return False
 
-    def on_reject(self, *args, **kwargs) -> None:
-        if self._on_reject is not None:
-            self._on_reject(*args, **kwargs)
+    def on_reject(self) -> None:
+        self.reject.set()
 
-    def on_cancel(self, *args, **kwargs) -> None:
-        if self._on_cancel is not None:
-            self._on_cancel(*args, **kwargs)
+    def on_cancel(self) -> None:
+        self.cancel.set()
 
-    def on_fill(self, *args, **kwargs) -> None:
-        if self._on_fill is not None:
-            self._on_fill(*args, **kwargs)
+    def on_fill(self) -> None:
+        self.fill.set()
 
     def is_valid(self) -> bool:
         """Validate order parameters for common errors.
