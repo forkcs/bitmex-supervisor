@@ -13,6 +13,9 @@ class Supervisor:
     def __init__(self, *, interface):
         self.exchange = interface
 
+        self.manage_orders = True
+        self.manage_position = True
+
         self.logger = setup_supervisor_logger('supervisor')
 
         self.position_size = 0
@@ -36,8 +39,10 @@ class Supervisor:
                 break
             if self._run_thread.is_set():
                 # Synchronize all here
-                self.sync_orders()
-                self.sync_position()
+                if self.manage_orders:
+                    self.sync_orders()
+                if self.manage_position:
+                    self.sync_position()
             else:
                 self._stopped.set()
                 self._run_thread.wait()
