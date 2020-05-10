@@ -87,7 +87,6 @@ class Order:
             self.side,
             self.price,
             self.stop_px,
-            self.hidden,
             self.close,
             self.reduce_only,
             self.passive
