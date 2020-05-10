@@ -149,7 +149,7 @@ class Order:
         if stop_px is not None:
             new_order.stop_px = stop_px
 
-        new_order.hidden = order_dict.get('displayQty', None) == 0
+        new_order.hidden = order_dict.get('displayQty', 1) == 0
 
         new_order.close = 'Close' in order_dict.get('execInst', '')
         new_order.reduce_only = 'ReduceOnly' in order_dict.get('execInst', '')
