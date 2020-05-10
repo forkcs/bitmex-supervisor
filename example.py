@@ -11,6 +11,10 @@ if __name__ == '__main__':
                         test=True, symbol='XBTUSD')
     supervisor = Supervisor(interface=exchange)
 
+    # you can disable managing position or orders by set to False needed properties
+    # supervisor.manage_position = False
+    # supervisor.manage_orders = False
+
     # create Order objects
     stop_loss = Order(order_type='Stop', stop_px=2000, qty=10, side='Sell')
     tp1 = Order(order_type='Limit', price=15000, qty=6, side='Sell', passive=True, reduce_only=True)
