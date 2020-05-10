@@ -12,6 +12,9 @@ class Exchange:
         self.symbol = symbol
         self.conn = BitMEX(symbol=symbol, api_key=api_key, api_secret=api_secret, test=test, init_ws=connect_ws)
 
+    def restart_ws(self):
+        self.conn.reinit_ws()
+
     def is_open(self):
         """Check that websockets are still open."""
 

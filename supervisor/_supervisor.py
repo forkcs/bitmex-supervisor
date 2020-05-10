@@ -35,6 +35,10 @@ class Supervisor:
 
     def _synchronization_cycle(self):
         while True:
+            if not self.exchange.is_open():
+                self.logger.warning('Websocket connection unexpectly closed, restarting...')
+                self.exchange.reinit_ws()
+                continue
             if self._exit_sync_thread.is_set():
                 break
             if self._run_thread.is_set():

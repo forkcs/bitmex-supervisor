@@ -35,7 +35,14 @@ class BitMEX(object):
         if self.init_ws:
             # Create websocket for streaming data
             self.ws = BitMEXWebsocket(self.base_url, api_key, api_secret)
-            self.ws.connect(symbol=symbol, shouldAuth=True)
+            self.ws.connect(symbol=self.symbol, shouldAuth=True)
+
+    def reinit_ws(self):
+        if self.init_ws:
+            del self.ws
+
+            self.ws = BitMEXWebsocket(self.base_url, self.api_key, self.api_secret)
+            self.ws.connect(symbol=self.symbol, shouldAuth=True)
 
     # Public methods ws
     def ticker_data(self):
