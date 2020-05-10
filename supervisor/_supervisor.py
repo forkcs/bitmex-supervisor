@@ -140,7 +140,7 @@ class Supervisor:
     # Orders #
     ##########
 
-    def add_order(self, order: Order, callback: Callable = None) -> None:
+    def add_order(self, order: Order) -> None:
         if order.is_valid():
             self._orders.append(order)
             self.logger.info(f'New order: {order.order_type} {order.side} {order.qty} by '
