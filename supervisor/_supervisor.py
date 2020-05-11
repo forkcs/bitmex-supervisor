@@ -61,8 +61,8 @@ class Supervisor:
     def sync_position(self):
         pos_size = self.exchange.get_position_size_ws()
         if pos_size != self.position_size:
-            self.entry(method='Market', qty=self.position_size - pos_size)
-            self.logger.info(f'Enter position on {self.position_size - pos_size}.')
+            self.correct_position_size(qty=self.position_size - pos_size)
+            self.logger.info(f'Correct position size on {self.position_size - pos_size}.')
 
     def sync_orders(self):
         """ All the orders synchronization logic should be here."""
@@ -142,12 +142,45 @@ class Supervisor:
     # Position #
     ############
 
-    def entry(self, method: str, qty: int) -> None:
-        if method == 'Market':
-            self._entry_by_market_order(qty)
+    def correct_position_size(self, qty: int) -> None:
+        self.enter_by_market_order(qty)
 
-    def _entry_by_market_order(self, qty: int) -> None:
+    def enter_by_market_order(self, qty: int) -> None:
         self.exchange.place_market_order(qty=qty)
+        self.logger.info(f'Enter position by market order on {qty} contracts.')
+
+    def enter_fb_method(self, qty: int, price_type: str, timeout: int, max_retry: int, deviation: int = None) -> None:
+        """
+        Fb method is placing n orders after timeout seconds, then entry market.
+
+        :param qty: entry position size
+        :param timeout: timeout before replacing the order
+        :param price_type: may be last, first_ob
+        :param deviation: deviation from last price in percents
+        :param max_retry: max order placing count
+        """
+
+        if price_type == 'first_ob':
+            init_price = self.exchange.get_first_orderbook_price_ws(bid=qty > 0)
+        elif price_type == 'third_ob':
+            init_price = self.exchange.get_third_orderbook_price_ws(bid=qty > 0)
+        elif price_type == 'deviant':
+            if qty > 0:
+                init_price = self.exchange.get_last_price_ws() * (100 + deviation) / 100
+            else:
+                init_price = self.exchange.get_last_price_ws() * (100 - deviation) / 100
+        else:
+            init_price = self.exchange.get_last_price_ws()
+
+        entry_order = Order(order_type='Limit', qty=qty, side='Buy' if qty > 0 else 'Sell', price=init_price)
+        for _ in range(max_retry):
+            self.exchange.place_order(entry_order)
+            for _ in range(timeout):
+                sleep(1)
+                if self.exchange.get_order_status_ws(entry_order) == 'Filled':
+                    return
+            self.exchange.cancel_order(entry_order)
+        self.enter_by_market_order(qty=qty)
 
     ##########
     # Orders #
