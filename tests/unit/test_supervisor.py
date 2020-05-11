@@ -1,6 +1,7 @@
 import unittest
-import requests
 from unittest.mock import Mock, call
+
+import requests
 
 from supervisor import Supervisor
 from supervisor.core.orders import Order
@@ -295,26 +296,68 @@ class SupervisorEntryTests(unittest.TestCase):
     def test_fb_entry_last_price(self):
         self.exchange_mock.get_last_price_ws.return_value = 1000
         self.exchange_mock.get_order_status_ws.return_value = 'Filled'
+        self.exchange_mock.conn.get_tick_size.return_value = 0.5
         self.supervisor.enter_fb_method(
             qty=228,
             price_type='last',
             max_retry=5,
             timeout=3
         )
-        order = Order(order_type='Limit', qty=228, price=1000, side='Buy')
+        order = Order(order_type='Limit', qty=228, price=1000, side='Buy', passive=True)
         self.exchange_mock.place_order.assert_called_once_with(order)
 
     def test_fb_entry_last_price_timeouted(self):
         self.exchange_mock.get_last_price_ws.return_value = 1000
         self.exchange_mock.get_order_status_ws.return_value = 'New'
+        self.exchange_mock.conn.get_tick_size.return_value = 0.5
         self.supervisor.enter_fb_method(
             qty=228,
             price_type='last',
             max_retry=5,
             timeout=1
         )
-        order = Order(order_type='Limit', qty=228, price=1000, side='Buy')
+        order = Order(order_type='Limit', qty=228, price=1000, side='Buy', passive=True)
         expected_calls = [call(order)] * 5
         self.exchange_mock.place_order.assert_has_calls(expected_calls)
 
         self.exchange_mock.place_market_order.assert_called_once_with(qty=228)
+
+    def test_fb_entry_first_orderbook_price(self):
+        self.exchange_mock.get_first_orderbook_price_ws.return_value = 1000
+        self.exchange_mock.get_order_status_ws.return_value = 'Filled'
+        self.exchange_mock.conn.get_tick_size.return_value = 0.5
+        self.supervisor.enter_fb_method(
+            qty=228,
+            price_type='first_ob',
+            max_retry=5,
+            timeout=1
+        )
+        order = Order(order_type='Limit', qty=228, price=1000, side='Buy', passive=True)
+        self.exchange_mock.place_order.assert_called_once_with(order)
+
+    def test_fb_entry_third_orderbook_price(self):
+        self.exchange_mock.get_third_orderbook_price_ws.return_value = 1000
+        self.exchange_mock.get_order_status_ws.return_value = 'Filled'
+        self.exchange_mock.conn.get_tick_size.return_value = 0.5
+        self.supervisor.enter_fb_method(
+            qty=228,
+            price_type='third_ob',
+            max_retry=5,
+            timeout=1
+        )
+        order = Order(order_type='Limit', qty=228, price=1000, side='Buy', passive=True)
+        self.exchange_mock.place_order.assert_called_once_with(order)
+
+    def test_fb_entry_with_deviation(self):
+        self.exchange_mock.get_last_price_ws.return_value = 1000
+        self.exchange_mock.get_order_status_ws.return_value = 'Filled'
+        self.exchange_mock.conn.get_tick_size.return_value = 0.5
+        self.supervisor.enter_fb_method(
+            qty=228,
+            price_type='deviant',
+            max_retry=5,
+            timeout=1,
+            deviation=-10
+        )
+        order = Order(order_type='Limit', qty=228, price=900, side='Buy', passive=True)
+        self.exchange_mock.place_order.assert_called_once_with(order)

@@ -4,6 +4,7 @@ from requests.exceptions import HTTPError
 
 from supervisor.core.orders import Order
 from supervisor.core.utils.log import setup_supervisor_logger
+from supervisor.core.utils.math import toNearest
 
 
 class Supervisor:
@@ -155,7 +156,7 @@ class Supervisor:
 
         :param qty: entry position size
         :param timeout: timeout before replacing the order
-        :param price_type: may be last, first_ob
+        :param price_type: may be last, first_ob, third_ob and deviant
         :param deviation: deviation from last price in percents
         :param max_retry: max order placing count
         """
@@ -172,7 +173,10 @@ class Supervisor:
         else:
             init_price = self.exchange.get_last_price_ws()
 
-        entry_order = Order(order_type='Limit', qty=qty, side='Buy' if qty > 0 else 'Sell', price=init_price)
+        init_price = toNearest(init_price, self.exchange.conn.get_tick_size())
+
+        entry_order = Order(order_type='Limit', qty=qty, side='Buy' if qty > 0 else 'Sell',
+                            price=init_price, passive=True)
         for _ in range(max_retry):
             self.exchange.place_order(entry_order)
             for _ in range(timeout):
