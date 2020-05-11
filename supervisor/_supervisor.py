@@ -84,9 +84,9 @@ class Supervisor:
                 if status in ['Filled', 'Triggered']:
                     self._orders.remove(order)
                     if order.side == 'Buy':
-                        self.position_size -= order.qty
-                    else:
                         self.position_size += order.qty
+                    else:
+                        self.position_size -= order.qty
                     self.logger.info(f'Order filled: {order.order_id} {order.order_type} {order.side} {order.qty} by '
                                      f'{order.price or order.stop_px}')
                     order.on_fill()
