@@ -130,11 +130,19 @@ class Supervisor:
                                     f'{order.order_type} {order.side} {order.qty} by {order.price or order.stop_px}')
 
     def cancel_needless_orders(self):
-        real_orders = self.exchange.get_open_orders_ws()
+        real_orders = self.exchange.get_open_orders_ws().copy()
+        needed_orders = self._orders.copy()
+
+        # difference of the lists with duplicates
         orders_to_cancel = []
-        for o in real_orders:
-            if o not in self._orders:
-                orders_to_cancel.append(o)
+        for _ in range(len(real_orders)):
+            for o in real_orders:
+                if o in needed_orders:
+                    real_orders.remove(o)
+                    needed_orders.remove(o)
+
+        orders_to_cancel = real_orders
+
         if len(orders_to_cancel) > 0:
             self.exchange.bulk_cancel_orders(orders_to_cancel)
             self.logger.info(f'Cancel {len(orders_to_cancel)} needless orders.')

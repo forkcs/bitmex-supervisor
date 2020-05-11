@@ -137,6 +137,29 @@ class SyncOrdersTests(unittest.TestCase):
         # assert that Supervisor try to cancel needless order
         self.exchange_mock.bulk_cancel_orders.assert_called_once_with(expected_orders)
 
+    def test_cancel_duplicates(self):
+        order1 = Order(order_type='Limit', qty=228, price=1000, side='Buy')
+        order2 = Order(order_type='Limit', qty=229, price=1001, side='Buy')
+        self.exchange_mock.get_open_orders_ws.return_value = [order1, order2, order2]
+        self.supervisor.add_order(order1)
+        self.supervisor.add_order(order2)
+        expected_orders = [order2]
+        self.supervisor.cancel_needless_orders()
+
+        # assert that Supervisor try to cancel needless order
+        self.exchange_mock.bulk_cancel_orders.assert_called_once_with(expected_orders)
+
+    def test_cancel_two_same_needed_orders(self):
+        order1 = Order(order_type='Limit', qty=228, price=1000, side='Buy')
+        order2 = Order(order_type='Limit', qty=228, price=1000, side='Buy')
+        order3 = Order(order_type='Limit', qty=229, price=1001, side='Buy')
+        self.exchange_mock.get_open_orders_ws.return_value = [order1, order2]
+        self.supervisor.add_order(order1)
+        self.supervisor.add_order(order2)
+        self.supervisor.add_order(order3)
+        self.supervisor.cancel_needless_orders()
+        self.exchange_mock.bulk_cancel_orders.assert_not_called()
+
     def test_check_unplaced_order(self):
         order = Order(order_type='Limit', qty=228, price=1000, side='Buy')
         self.supervisor.add_order(order)
