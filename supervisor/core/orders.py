@@ -26,6 +26,8 @@ class Order:
         self.reduce_only = reduce_only
         self.passive = passive
 
+        # DO NOT USE Supervisor.stop_cycle() into callbacks!!!
+        # It causes 100% deadlock
         self._on_reject: Callable = None
         self._on_cancel: Callable = None
         self._on_fill: Callable = None

@@ -24,6 +24,7 @@ if __name__ == '__main__':
     supervisor.position_size = 10
 
     # attach some callbacks to stop-loss, note that events starts with "_"
+    # DO NOT USE stop_cycle() method into callbacks!!! It causes the deadlock
     stop_loss._on_reject = lambda: print('Rejected')
     stop_loss._on_fill = lambda: print('We lost position(')
     stop_loss._on_cancel = lambda: print('Trading without stops is risking ;)')
