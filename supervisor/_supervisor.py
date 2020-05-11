@@ -22,12 +22,9 @@ class Supervisor:
         self._orders = []
 
         self.sync_thread = Thread(target=self._synchronization_cycle)
-        # signal for terminate thread
-        self._exit_sync_thread = Event()
-        # when event is set, cycle is running
-        self._run_thread = Event()
-        # stop thread confirmation
-        self._stopped = Event()
+        self._exit_sync_thread = Event()  # signal for terminate thread
+        self._run_thread = Event()  # when event is set, cycle is running
+        self._stopped = Event()  # stop thread confirmation
 
     ###########################
     # Synchronization methods #
