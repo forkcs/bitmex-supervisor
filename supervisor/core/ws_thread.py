@@ -101,6 +101,10 @@ class BitMEXWebsocket:
         # The instrument has a tickSize. Use it to round values.
         return {k: toNearest(float(v or 0), instrument['tickSize']) for k, v in iteritems(ticker)}
 
+    def get_tick_size(self, symbol):
+        instrument = self.get_instrument(symbol)
+        return instrument['tickSize']
+
     def funds(self):
         return self.data['margin'][0]
 

@@ -49,6 +49,9 @@ class BitMEX(object):
         """Get ticker data."""
         return self.ws.get_ticker(self.symbol)
 
+    def get_tick_size(self):
+        return self.ws.get_tick_size(self.symbol)
+
     def ticker_all_data(self):
         """Get ticker data."""
         return self.ws.get_instrument(self.symbol)
