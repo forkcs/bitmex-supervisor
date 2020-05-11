@@ -2,7 +2,7 @@
 
 This is a library-like application, which operates with orders and positions on your account.
 
-*Current version:* **0.5.2**
+*Current version:* **0.5.3**
 #### Features:
 * Creating an cancelling orders on your account. Stop-loss, Limit, passive, reduce-only, close-only, hidden orders supported.
 * Preventing these orders for being lost, cancelled or rejected: Supervisor will place them anew.
@@ -10,8 +10,8 @@ This is a library-like application, which operates with orders and positions on 
 * When the supervised order has been filled, Supervisor will not try to place it. 
 * Put callbacks on supervised orders, which are called when order has been filled, partially executed or cancelled.
 * Set and maintain the position size.
-#### In develop:
 * Various market-price or limit entries in position.
+#### In develop:
 * Enter position with rebate by tracking last market price and moving limit order up.
 
 ## Getting Started
@@ -115,6 +115,14 @@ Set necessary position size, Supervisor will fix it:
 
 ```python
 supervisor.position = 150
+```
+
+If Supervisor is already running, you can use on of provided entry methods
+
+```python
+supervisor.stop_cycle()
+supervisor.enter_by_market_order(150)
+supervisor.run_cycle()
 ```
 
 Create order:
