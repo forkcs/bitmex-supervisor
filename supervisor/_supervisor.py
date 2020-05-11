@@ -134,7 +134,6 @@ class Supervisor:
         needed_orders = self._orders.copy()
 
         # difference of the lists with duplicates
-        orders_to_cancel = []
         for _ in range(len(real_orders)):
             for o in real_orders:
                 if o in needed_orders:
