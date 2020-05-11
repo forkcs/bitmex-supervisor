@@ -89,9 +89,6 @@ class Order:
             self.side,
             self.price,
             self.stop_px,
-            self.close,
-            self.reduce_only,
-            self.passive
         ]
         return parameters
 
