@@ -148,6 +148,7 @@ class Supervisor:
 
     def enter_by_market_order(self, qty: int) -> None:
         self.exchange.place_market_order(qty=qty)
+        self.position_size += qty
         self.logger.info(f'Enter position by market order on {qty} contracts.')
 
     def enter_fb_method(self, qty: int, price_type: str, timeout: int, max_retry: int, deviation: int = None) -> None:
@@ -180,9 +181,9 @@ class Supervisor:
         for _ in range(max_retry):
             self.exchange.place_order(entry_order)
             for _ in range(timeout):
-                sleep(1)
                 if self.exchange.get_order_status_ws(entry_order) == 'Filled':
                     return
+                sleep(1)
             self.exchange.cancel_order(entry_order)
         self.enter_by_market_order(qty=qty)
 
