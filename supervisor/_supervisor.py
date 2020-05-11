@@ -208,6 +208,5 @@ class Supervisor:
         self.logger.info(f'Exited from Supervisor.')
 
     def reset(self):
-        self.stop_cycle()
         self.position_size = 0
         self._orders = []
