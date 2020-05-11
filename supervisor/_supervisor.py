@@ -34,18 +34,25 @@ class Supervisor:
 
     def _synchronization_cycle(self):
         while True:
+
+            # keep ws connection open
             if not self.exchange.is_open():
                 self.logger.warning('Websocket connection unexpectly closed, restarting...')
                 self.exchange.reinit_ws()
                 continue
+
+            # if exit Event were sent, exiting cycle
             if self._exit_sync_thread.is_set():
                 break
+
+            # if all right, do the job)
             if self._run_thread.is_set():
                 # Synchronize all here
                 if self.manage_orders:
                     self.sync_orders()
                 if self.manage_position:
                     self.sync_position()
+            # if it`s not all right, enter the stopped condition
             else:
                 self._stopped.set()
                 self._run_thread.wait()
@@ -100,6 +107,9 @@ class Supervisor:
                     self.logger.info(f'Order rejected: {order.order_id} {order.order_type} '
                                      f'{order.side} {order.qty} by {order.price or order.stop_px}')
                     order.on_reject()
+        self.place_needed_orders(orders_to_place)
+
+    def place_needed_orders(self, orders_to_place: list):
         try:
             if len(orders_to_place) == 1:
                 order = orders_to_place[0]
