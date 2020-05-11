@@ -144,7 +144,7 @@ class Supervisor:
     ############
 
     def correct_position_size(self, qty: int) -> None:
-        self.enter_by_market_order(qty)
+        self.exchange.place_market_order(qty=qty)
 
     def enter_by_market_order(self, qty: int) -> None:
         self.exchange.place_market_order(qty=qty)

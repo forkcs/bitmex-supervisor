@@ -276,6 +276,14 @@ class SyncPositionTests(unittest.TestCase):
 
         self.supervisor.correct_position_size.assert_called_once_with(qty=100)
 
+    def test_correct_position_size(self):
+        self.supervisor.position_size = 20
+        self.exchange_mock.get_position_size_ws.return_value = 0
+        self.supervisor.correct_position_size(20)
+
+        self.assertEqual(20, self.supervisor.position_size)
+        self.exchange_mock.place_market_order.assert_called_once_with(qty=20)
+
 
 class SupervisorEntryTests(unittest.TestCase):
 
