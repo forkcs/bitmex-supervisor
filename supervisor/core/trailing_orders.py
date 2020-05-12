@@ -20,7 +20,7 @@ class TrailingShell:
     # Don't grow a table larger than this amount. Helps cap memory usage.
     MAX_TABLE_LEN = 200
 
-    def __init__(self, order, offset: int, tick_size: float, test=True):
+    def __init__(self, order, offset: int, tick_size: float, test=True, init_ws=True):
         self.tick_size = tick_size
         self.exited = False
         self.test = test
@@ -39,7 +39,8 @@ class TrailingShell:
 
         self.__reset()
 
-        self.connect()
+        if init_ws:
+            self.connect()
 
     def __del__(self):
         self.exit()
