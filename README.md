@@ -11,6 +11,7 @@ This is a library-like application, which operates with orders and positions on 
 * Put callbacks on supervised orders, which are called when order has been filled, partially executed or cancelled.
 * Set and maintain the position size.
 * Various market-price or limit entries in position.
+* Place Trailing-stop levels
 #### In develop:
 * Enter position with rebate by tracking last market price and moving limit order up.
 
