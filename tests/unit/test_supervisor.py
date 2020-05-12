@@ -178,26 +178,6 @@ class SyncOrdersTests(unittest.TestCase):
 
         self.exchange_mock.bulk_place_orders.assert_called_once_with([order1, order2, order3])
 
-    def test_check_canceled_order(self):
-        def order_status_mock(_order):
-            if _order == order:
-                return 'Canceled'
-
-        on_cancel_mock = Mock()
-
-        self.exchange_mock.get_order_status_ws.side_effect = order_status_mock
-
-        order = Order(order_type='Limit', qty=228, price=1000, side='Buy')
-        order.order_id = '1234'
-        order._on_cancel = on_cancel_mock
-        self.supervisor.add_order(order)
-
-        self.supervisor.check_needed_orders()
-        # assert that Supervisor place order anew
-        self.exchange_mock.place_order.assert_called_once_with(order)
-        # assert that Supervisor call matching callback
-        on_cancel_mock.assert_called_once()
-
     def test_check_rejected_order(self):
         def order_status_mock(_order):
             if _order == order:

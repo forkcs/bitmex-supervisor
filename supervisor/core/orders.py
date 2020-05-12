@@ -33,7 +33,6 @@ class Order:
         # DO NOT USE Supervisor.stop_cycle() into callbacks!!!
         # It causes 100% deadlock
         self._on_reject: Callable = None
-        self._on_cancel: Callable = None
         self._on_fill: Callable = None
 
     def __eq__(self, other):
@@ -46,10 +45,6 @@ class Order:
     def on_reject(self, *args, **kwargs) -> None:
         if self._on_reject is not None:
             self._on_reject(*args, **kwargs)
-
-    def on_cancel(self, *args, **kwargs) -> None:
-        if self._on_cancel is not None:
-            self._on_cancel(*args, **kwargs)
 
     def on_fill(self, *args, **kwargs) -> None:
         if self._on_fill is not None:
