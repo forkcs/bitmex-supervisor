@@ -28,6 +28,8 @@ class Order:
         self.reduce_only = reduce_only
         self.passive = passive
 
+        self.is_trailing = False
+
         # DO NOT USE Supervisor.stop_cycle() into callbacks!!!
         # It causes 100% deadlock
         self._on_reject: Callable = None
@@ -129,6 +131,8 @@ class Order:
             exec_inst.append('ReduceOnly')
         if self.passive:
             exec_inst.append('ParticipateDoNotInitiate')
+        if self.order_type == 'Stop':
+            exec_inst.append('LastPrice')
 
         if exec_inst or include_empty:
             exec_inst_str = ','.join(exec_inst)

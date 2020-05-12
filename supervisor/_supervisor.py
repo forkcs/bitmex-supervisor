@@ -3,8 +3,9 @@ from threading import Thread, Event
 from requests.exceptions import HTTPError
 
 from supervisor.core.orders import Order
-from supervisor.core.utils.log import setup_supervisor_logger
 from supervisor.core.utils.math import to_nearest
+from supervisor.core.trailing_orders import TrailingShell
+from supervisor.core.utils.log import setup_supervisor_logger
 
 
 class Supervisor:
@@ -20,6 +21,7 @@ class Supervisor:
 
         self.position_size = 0
         self._orders = []
+        self._trackers = []
 
         self.sync_thread = Thread(target=self._synchronization_cycle)
         self._exit_sync_thread = Event()  # signal for terminate thread
@@ -87,7 +89,11 @@ class Supervisor:
             else:
                 status = self.exchange.get_order_status_ws(order)
                 if status in ['Filled', 'Triggered']:
+
+                    if order.is_trailing:
+                        order.tracker.exit()
                     self._orders.remove(order)
+
                     if order.side == 'Buy':
                         self.position_size += order.qty
                     else:
@@ -202,6 +208,21 @@ class Supervisor:
                              f'{order.price or order.stop_px}')
         else:
             raise ValueError('Order is not valid.')
+
+    def add_trailing_order(self, order: Order, offset: int) -> None:
+        """
+
+        :param order: Order instance
+        :param offset: value in percents, distance from extremum
+        """
+
+        if order.is_valid():
+            order.is_trailing = True
+            tick_size = self.exchange.conn.get_tick_size()
+            test = 'testnet' in self.exchange.conn.base_url
+            order.tracker = TrailingShell(order=order, offset=offset, tick_size=tick_size, test=test)
+            order.tracker.start_trailing(initial_price=self.exchange.get_last_price_ws())
+            self._orders.append(order)
 
     def remove_order(self, order: Order):
         if order in self._orders:
