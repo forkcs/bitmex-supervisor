@@ -209,7 +209,7 @@ class Supervisor:
             self.logger.info(f'Forget the order: {order.order_type} {order.side} {order.qty} by '
                              f'{order.price or order.stop_px}')
 
-    def move_order(self, order: Order, to: int):
+    def move_order(self, order: Order, to: float):
         if order in self._orders:
             order.move(to=to)
 

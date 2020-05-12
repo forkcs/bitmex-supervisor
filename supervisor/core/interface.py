@@ -106,8 +106,6 @@ class Exchange:
 
     def bulk_place_orders(self, orders):
         order_dicts = [order.as_dict() for order in orders]
-        for order_dict in order_dicts:
-            order_dict.update(symbol=self.symbol)
 
         response = self.conn.order_bulk_create(order_dicts)
         for order_dict, order in zip(response, orders):

@@ -181,6 +181,7 @@ class ExportImportOrdersTests(unittest.TestCase):
             passive=True
         )
         expected_order_dict = {
+            'symbol': 'XBTUSD',
             'clOrdID': None,
             'orderID': None,
             'ordType': 'Limit',
@@ -204,6 +205,7 @@ class ExportImportOrdersTests(unittest.TestCase):
             price=Decimal(1000)
         )
         expected_order_dict = {
+            'symbol': 'XBTUSD',
             'ordType': 'Limit',
             'orderQty': 228,
             'side': 'Buy',
@@ -214,6 +216,7 @@ class ExportImportOrdersTests(unittest.TestCase):
 
     def test_import_limit_order_from_dict(self):
         order_dict = {
+            'symbol': 'XBTUSD',
             'clOrdID': None,
             'orderID': None,
             'ordType': 'Limit',
@@ -238,6 +241,7 @@ class ExportImportOrdersTests(unittest.TestCase):
 
     def test_import_stop_order_from_dict(self):
         order_dict = {
+            'symbol': 'XBTUSD',
             'clOrdID': None,
             'orderID': None,
             'ordType': 'Stop',

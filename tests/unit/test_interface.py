@@ -63,16 +63,16 @@ class InterfaceHttpMethodsTests(unittest.TestCase):
 
         expected_orders = [
             {
+                'symbol': settings.TEST_SYMBOL,
                 'ordType': 'Limit',
                 'orderQty': 228,
                 'price': 1000.0,
-                'symbol': settings.TEST_SYMBOL
             },
             {
+                'symbol': settings.TEST_SYMBOL,
                 'ordType': 'Limit',
                 'orderQty': 229,
                 'price': 1001.0,
-                'symbol': settings.TEST_SYMBOL
             }
 
         ]

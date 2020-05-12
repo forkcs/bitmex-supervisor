@@ -3,6 +3,7 @@ from typing import Callable
 
 class Order:
     def __init__(self,
+                 symbol: str = 'XBTUSD',
                  order_type: str = None,
                  clordid: str = None,
                  qty: int = None,
@@ -14,6 +15,7 @@ class Order:
                  reduce_only: bool = False,
                  passive: bool = False):
 
+        self.symbol = symbol
         self.order_id = None
         self.order_type = order_type
         self.clordid = clordid
@@ -57,6 +59,9 @@ class Order:
         Method made for prevent 4xx errors on API requests.
         """
 
+        # all orders must have symbol
+        if self.symbol is None:
+            return False
         # all orders must have order type
         if self.order_type is None:
             return False
@@ -84,6 +89,7 @@ class Order:
         """Get essential parameters, that are used to distinguish orders."""
 
         parameters = [
+            self.symbol,
             self.order_type,
             self.qty,
             self.side,
@@ -98,6 +104,7 @@ class Order:
         order_dict = {}
         exec_inst = []
 
+        order_dict['symbol'] = self.symbol
         if self.order_id is not None or include_empty:
             order_dict['orderID'] = self.order_id
         if self.order_type is not None or include_empty:
@@ -134,6 +141,7 @@ class Order:
         """This method creates new Order object from standart BitMEX API order dictionary."""
 
         new_order = Order()
+        new_order.symbol = order_dict.get('symbol', 'XBTUSD')
         new_order.order_id = order_dict.get('orderID', None)
         new_order.order_type = order_dict.get('ordType', None)
         new_order.qty = order_dict.get('orderQty', None)
