@@ -4,7 +4,7 @@ from requests.exceptions import HTTPError
 
 from supervisor.core.orders import Order
 from supervisor.core.utils.log import setup_supervisor_logger
-from supervisor.core.utils.math import toNearest
+from supervisor.core.utils.math import to_nearest
 
 
 class Supervisor:
@@ -178,7 +178,7 @@ class Supervisor:
         else:
             init_price = self.exchange.get_last_price_ws()
 
-        init_price = toNearest(init_price, self.exchange.conn.get_tick_size())
+        init_price = to_nearest(init_price, self.exchange.conn.get_tick_size())
 
         entry_order = Order(order_type='Limit', qty=qty, side='Buy' if qty > 0 else 'Sell',
                             price=init_price, passive=True)

@@ -43,6 +43,10 @@ class OrderValidationTests(unittest.TestCase):
         order = Order()
         self.assertFalse(order.is_valid())
 
+    def test_make_order_with_no_symbol(self):
+        order = Order(symbol=None, qty=228, side='Buy', price=Decimal(1000))
+        self.assertFalse(order.is_valid())
+
     def test_make_order_with_no_order_type(self):
         order = Order(qty=228, side='Buy', price=Decimal(1000))
         self.assertFalse(order.is_valid())

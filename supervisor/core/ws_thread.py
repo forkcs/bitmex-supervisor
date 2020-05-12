@@ -9,7 +9,7 @@ import decimal
 import logging
 from supervisor.core.auth import generate_expires, generate_signature
 from supervisor.core.utils.log import setup_api_logger
-from supervisor.core.utils.math import toNearest
+from supervisor.core.utils.math import to_nearest
 from urllib.parse import urlparse, urlunparse
 from future.utils import iteritems
 
@@ -99,7 +99,7 @@ class BitMEXWebsocket:
             }
 
         # The instrument has a tickSize. Use it to round values.
-        return {k: toNearest(float(v or 0), instrument['tickSize']) for k, v in iteritems(ticker)}
+        return {k: to_nearest(float(v or 0), instrument['tickSize']) for k, v in iteritems(ticker)}
 
     def get_tick_size(self, symbol):
         instrument = self.get_instrument(symbol)
