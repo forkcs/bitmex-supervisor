@@ -105,7 +105,6 @@ class Supervisor:
                     orders_to_place.append(order)
                     self.logger.info(f'Order cancelled, trying to place it: '
                                      f'{order.order_type} {order.side} {order.qty} by {order.price or order.stop_px}')
-                    order.on_cancel()
                 elif status == 'Rejected':
                     self._orders.remove(order)
                     self.logger.info(f'Order rejected: {order.order_id} {order.order_type} '
