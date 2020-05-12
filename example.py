@@ -20,6 +20,8 @@ if __name__ == '__main__':
     tp1 = Order(order_type='Limit', price=15000, qty=6, side='Sell', passive=True)
     tp2 = Order(order_type='Limit', price=20000, qty=4, side='Sell', hidden=True)
 
+    trailing_stop = Order(order_type='Stop', stop_px=3000, qty=10, side='Sell')
+
     # attach some callbacks to stop-loss, note that events starts with "_"
     # DO NOT USE stop_cycle() method into callbacks!!! It causes the deadlock
     stop_loss._on_reject = lambda: print('Rejected')
@@ -32,6 +34,7 @@ if __name__ == '__main__':
     supervisor.add_order(stop_loss)
     supervisor.add_order(tp1)
     supervisor.add_order(tp2)
+    supervisor.add_trailing_order(trailing_stop, offset=10)  # order will trail on 10% distance from currenr price
     input('Enter to enter position')
     supervisor.stop_cycle()
     supervisor.enter_by_market_order(10)
