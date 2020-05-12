@@ -26,7 +26,6 @@ if __name__ == '__main__':
     # DO NOT USE stop_cycle() method into callbacks!!! It causes the deadlock
     stop_loss._on_reject = lambda: print('Rejected')
     stop_loss._on_fill = lambda: print('We lost position(')
-    stop_loss._on_cancel = lambda: print('Trading without stops is risking ;)')
 
     input('Enter to run cycle')
     supervisor.run_cycle()

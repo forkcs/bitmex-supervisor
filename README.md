@@ -2,7 +2,7 @@
 
 This is a library-like application, which operates with orders and positions on your account.
 
-*Current version:* **0.6**
+*Current version:* **0.6.1**
 #### Features:
 * Creating an cancelling orders on your account. Stop-loss, Limit, passive, reduce-only, close-only, hidden orders supported.
 * Preventing these orders for being lost, cancelled or rejected: Supervisor will place them anew.
@@ -151,12 +151,11 @@ order._on_fill = callback
 # Run cycle and when your order filled, the message will be printed.
 ```
 
-There are 3 possible events provided:
+There are 2 possible events provided:
 
 ```python
 Order._on_fill: Callable
 Order._on_reject: Callable
-Order._on_cancel: Callable
 ```
 
 Run Supervisor cycle (works in own thread):
