@@ -1,5 +1,4 @@
 import unittest
-from time import sleep
 from unittest.mock import Mock
 
 from supervisor import Supervisor
