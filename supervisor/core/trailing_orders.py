@@ -56,6 +56,19 @@ class TrailingShell:
         self.exited = False
         self._error = None
 
+    def get_instrument(self, symbol):
+        instruments = self.data.get('instrument', None)
+        if instruments is None:
+            return None
+        matching_instruments = [i for i in instruments if i['symbol'] == symbol]
+        if len(matching_instruments) == 0:
+            raise Exception("Unable to find instrument or index with symbol: " + symbol)
+        instrument = matching_instruments[0]
+        # Turn the 'tickSize' into 'tickLog' for use in rounding
+        # http://stackoverflow.com/a/6190291/832202
+        instrument['tickLog'] = decimal.Decimal(str(instrument['tickSize'])).as_tuple().exponent * -1
+        return instrument
+
     def calculate_new_price(self, extremum) -> float:
         if self.order.side == 'Sell':
             needed_price = extremum * (1 - self.offset / 100)
@@ -208,15 +221,14 @@ class TrailingShell:
             else:
                 raise Exception("Unknown action: %s" % action)
 
-        instrument = self.data['instrument'][0]
-        # Turn the 'tickSize' into 'tickLog' for use in rounding
-        instrument['tickLog'] = decimal.Decimal(str(instrument['tickSize'])).as_tuple().exponent * -1
-        self.last_price = instrument['lastPrice']
-        if self.tracking:
-            if self.last_price > self.max_price and self.order.side == 'Sell':
-                self.max_price = self.last_price
-            elif self.last_price < self.min_price and self.order.side == 'Buy':
-                self.min_price = self.last_price
+        instrument = self.get_instrument(symbol=self.order.symbol)
+        if instrument is not None:
+            self.last_price = instrument['lastPrice']
+            if self.tracking:
+                if self.last_price > self.max_price and self.order.side == 'Sell':
+                    self.max_price = self.last_price
+                elif self.last_price < self.min_price and self.order.side == 'Buy':
+                    self.min_price = self.last_price
 
     def __on_close(self):
         self.exit()
