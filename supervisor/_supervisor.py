@@ -149,6 +149,7 @@ class Supervisor:
                 if o.almost_equal(o_to_c):
                     self.exchange.move_order(order=o)
                     orders_to_cancel.remove(o_to_c)
+                    self.logger.info(f'Moved {o.order_type} order with {order.qty} quantity}')
 
         if len(orders_to_cancel) > 0:
             self.exchange.bulk_cancel_orders(orders_to_cancel)
