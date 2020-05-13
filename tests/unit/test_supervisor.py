@@ -116,6 +116,21 @@ class SyncOrdersTests(unittest.TestCase):
         # assert that Supervisor try to cancel needless order
         self.exchange_mock.bulk_cancel_orders.assert_called_once_with(expected_orders)
 
+    def test_move_changed_order(self):
+        """Test that Supervisor will amend order, not cancel it."""
+
+        order1 = Order(order_type='Limit', qty=228, price=1000, side='Buy')
+        order1_copy = Order(order_type='Limit', qty=228, price=1000, side='Buy')
+        self.supervisor.add_order(order1)
+
+        self.exchange_mock.get_open_orders_ws.return_value = [order1_copy]
+        order1.move(to=1001)
+
+        self.supervisor.cancel_needless_orders()
+
+        self.exchange_mock.bulk_cancel_orders.assert_not_called()
+        self.exchange_mock.move_order.assert_called_once_with(order=order1)
+
     def test_cancel_several_needless_orders(self):
         order1 = Order()
         order2 = Order()
@@ -318,7 +333,7 @@ class SupervisorEntryTests(unittest.TestCase):
             timeout=1
         )
         order = Order(order_type='Limit', qty=228, price=1000, side='Buy', passive=True)
-        expected_calls = [call(order)] * 5
+        expected_calls = [call(order)] * 3
         self.exchange_mock.place_order.assert_has_calls(expected_calls)
 
         self.exchange_mock.place_market_order.assert_called_once_with(qty=228)

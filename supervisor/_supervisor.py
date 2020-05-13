@@ -144,13 +144,15 @@ class Supervisor:
 
         orders_to_cancel = real_orders
 
+        for o_to_c in orders_to_cancel:
+            for o in needed_orders:
+                if o.almost_equal(o_to_c):
+                    self.exchange.move_order(order=o)
+                    orders_to_cancel.remove(o_to_c)
+
         if len(orders_to_cancel) > 0:
             self.exchange.bulk_cancel_orders(orders_to_cancel)
             self.logger.info(f'Cancel {len(orders_to_cancel)} needless orders.')
-
-        def move_order(order, to: float):
-            order.move(to)
-            self.exchange.move_order(to=to)
 
     ############
     # Position #
