@@ -402,7 +402,7 @@ class BitMEX(object):
         return self.call_api(path=path, query=query, verb="GET")
 
     @authentication_required
-    def order_edit(self, orderID=None, origClOrdID=None, clOrdID=None, orderQty=None, leavesQty=None, price=None, stopPx=None, pegOffsetValue=None, text=None, postdict=None):
+    def order_edit(self, orderID=None, origClOrdID=None, clOrdID=None, orderQty=None, leavesQty=None, price=None, stopPx=None, pegOffsetValue=None, text=None, postdict=None, **kwargs):
         """Amend the quantity or price of an open order."""
         if postdict is None:
             postdict = {}

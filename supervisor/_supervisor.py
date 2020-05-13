@@ -148,6 +148,10 @@ class Supervisor:
             self.exchange.bulk_cancel_orders(orders_to_cancel)
             self.logger.info(f'Cancel {len(orders_to_cancel)} needless orders.')
 
+        def move_order(order, to: float):
+            order.move(to)
+            self.exchange.move_order(to=to)
+
     ############
     # Position #
     ############
@@ -228,10 +232,6 @@ class Supervisor:
             self._orders.remove(order)
             self.logger.info(f'Forget the order: {order.order_type} {order.side} {order.qty} by '
                              f'{order.price or order.stop_px}')
-
-    def move_order(self, order: Order, to: float):
-        if order in self._orders:
-            order.move(to=to)
 
     ###################
     # Control methods #

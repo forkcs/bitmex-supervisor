@@ -42,6 +42,13 @@ class Order:
             return True
         return False
 
+    def almost_equal(self, other):
+        """If ordes are same at all except price or stop_ps."""
+
+        if self.get_not_price_comparison_params() == other.get_not_price_comparison_params():
+            return True
+        return False
+
     def on_reject(self, *args, **kwargs) -> None:
         if self._on_reject is not None:
             self._on_reject(*args, **kwargs)
@@ -92,6 +99,17 @@ class Order:
             self.side,
             self.price,
             self.stop_px,
+        ]
+        return parameters
+
+    def get_not_price_comparison_params(self) -> list:
+        """Get several comparison parameters, that are used to move orders."""
+
+        parameters = [
+            self.symbol,
+            self.order_type,
+            self.qty,
+            self.side
         ]
         return parameters
 

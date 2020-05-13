@@ -97,6 +97,10 @@ class Exchange:
     def get_order_executions_ws(self, clordid):
         return self.conn.get_executions(clordid=clordid)
 
+    def move_order(self, order, to: float):
+        order.move(to=to)
+        self.conn.order_edit(**order.as_dict())
+
     def place_order(self, order):
         new_order = self.conn.order_create(**order.as_dict())
         order.order_id = new_order.get('orderID', '')

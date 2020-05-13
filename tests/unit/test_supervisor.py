@@ -94,16 +94,6 @@ class SupervisorOrdersTests(unittest.TestCase):
         self.supervisor.remove_order(new_order)
         self.assertNotIn(new_order, self.supervisor._orders)
 
-    def test_move_order(self):
-        new_order = Order(order_type='Limit', qty=228, price=1000, side='Buy')
-        self.supervisor.add_order(new_order)
-
-        self.supervisor.move_order(new_order, 1001)
-        # assert that modified object is the same object created before
-        self.assertIn(new_order, self.supervisor._orders)
-        # assert that order was moved
-        self.assertEqual(1001, new_order.price)
-
 
 class SyncOrdersTests(unittest.TestCase):
     """All methods that associated with placing and cancelling orders in cycle."""
@@ -324,7 +314,7 @@ class SupervisorEntryTests(unittest.TestCase):
         self.supervisor.enter_fb_method(
             qty=228,
             price_type='last',
-            max_retry=5,
+            max_retry=3,
             timeout=1
         )
         order = Order(order_type='Limit', qty=228, price=1000, side='Buy', passive=True)

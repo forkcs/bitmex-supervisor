@@ -84,3 +84,23 @@ class InterfaceHttpMethodsTests(unittest.TestCase):
             )
             self.exchange.bulk_place_orders(orders=[order1, order2])
             self.assertEqual(json.dumps({'orders': expected_orders}), rsps.calls[0].request.body)
+
+    def test_move_order(self):
+        order1 = Order(order_type='Limit', price=1000, qty=228, side='Sell')
+        order1.order_id = 1234
+
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                responses.PUT,
+                settings.BASE_URL + '/order',
+                json={}
+            )
+            expected_order = {
+                'orderID': 1234,
+                'orderQty': 228,
+                'price': 1001.0,
+            }
+
+            self.exchange.move_order(order1, to=1001)
+            self.assertEqual(1, len(rsps.calls))
+            self.assertEqual(json.dumps(expected_order), rsps.calls[0].request.body)
