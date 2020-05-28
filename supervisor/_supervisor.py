@@ -193,7 +193,7 @@ class Supervisor:
         init_price = to_nearest(init_price, self.exchange.conn.get_tick_size())
 
         entry_order = Order(order_type='Limit', qty=qty, side='Buy' if qty > 0 else 'Sell',
-                            price=init_price, passive=True)
+                            price=init_price, passive=False)
         for _ in range(max_retry):
             self.exchange.place_order(entry_order)
             for _ in range(timeout):
