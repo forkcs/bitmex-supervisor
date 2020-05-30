@@ -44,15 +44,15 @@ class OrderValidationTests(unittest.TestCase):
         self.assertFalse(order.is_valid())
 
     def test_make_order_with_no_symbol(self):
-        order = Order(symbol=None, qty=228, side='Buy', price=Decimal(1000))
+        order = Order(symbol=None, qty=228, side='Buy', price=1000)
         self.assertFalse(order.is_valid())
 
     def test_make_order_with_no_order_type(self):
-        order = Order(qty=228, side='Buy', price=Decimal(1000))
+        order = Order(qty=228, side='Buy', price=1000)
         self.assertFalse(order.is_valid())
 
     def test_make_limit_order_with_stop_px(self):
-        order = Order(order_type='Limit', qty=228, stop_px=Decimal(1000))
+        order = Order(order_type='Limit', qty=228, stop_px=1000)
         self.assertFalse(order.is_valid())
 
     def test_make_limit_order_without_price(self):
@@ -60,23 +60,27 @@ class OrderValidationTests(unittest.TestCase):
         self.assertFalse(order.is_valid())
 
     def test_make_limit_order_without_side(self):
-        order = Order(order_type='Limit', qty=228, price=Decimal(1000))
+        order = Order(order_type='Limit', qty=228, price=1000)
         self.assertFalse(order.is_valid())
 
     def test_make_limit_order_with_negative_qty(self):
-        order = Order(order_type='Limit', qty=-228, side='Buy', price=Decimal(1000))
+        order = Order(order_type='Limit', qty=-228, side='Buy', price=1000)
         self.assertFalse(order.is_valid())
 
     def test_make_limit_order_with_negative_price(self):
-        order = Order(order_type='Limit', qty=228, side='Buy', price=Decimal(-1000))
+        order = Order(order_type='Limit', qty=228, side='Buy', price=-1000)
         self.assertFalse(order.is_valid())
 
     def test_make_limit_order_with_bad_side(self):
-        order = Order(order_type='Limit', qty=228, side='Bad side', price=Decimal(1000))
+        order = Order(order_type='Limit', qty=228, side='Bad side', price=1000)
+        self.assertFalse(order.is_valid())
+
+    def test_make_order_with_bad_order_type(self):
+        order = Order(order_type='Bad type', qty=228, side='Buy', price=1000)
         self.assertFalse(order.is_valid())
 
     def test_make_correct_stop_order(self):
-        order = Order(order_type='Stop', qty=228, side='Sell', stop_px=Decimal(1000))
+        order = Order(order_type='Stop', qty=228, side='Sell', stop_px=1000)
         self.assertTrue(order.is_valid())
 
     def test_make_stop_order_without_stop_px(self):
@@ -84,8 +88,16 @@ class OrderValidationTests(unittest.TestCase):
         self.assertFalse(order.is_valid())
 
     def test_make_stop_order_with_negative_stop_px(self):
-        order = Order(order_type='Stop', qty=228, side='Sell', stop_px=Decimal(-1000))
+        order = Order(order_type='Stop', qty=228, side='Sell', stop_px=-1000)
         self.assertFalse(order.is_valid())
+
+    def test_make_stop_order_with_no_qty(self):
+        order = Order(order_type='Stop', side='Sell', stop_px=1000)
+        self.assertFalse(order.is_valid())
+
+    def test_make_close_stop_order_with_no_qty(self):
+        order = Order(order_type='Stop', side='Sell', stop_px=1000, close=True)
+        self.assertTrue(order.is_valid())
 
 
 class OrdersComparisonTests(unittest.TestCase):

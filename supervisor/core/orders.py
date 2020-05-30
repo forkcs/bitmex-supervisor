@@ -80,11 +80,14 @@ class Order:
         # all orders must has an order type
         if self.order_type is None:
             return False
-        # all orders must has a side
+        # all orders must has a  side
         if self.side is None:
             return False
         # Only Close orders may has no quantity
         if self.qty is None and not self.close:
+            return False
+        # quantity must be positive
+        if self.qty is not None and self.qty <= 0:
             return False
 
         # Check limit orders below:
@@ -102,6 +105,12 @@ class Order:
             # stop_px must be positive
             if self.stop_px <= 0:
                 return False
+
+        # bad arguments check
+        if self.side not in ORDER_SIDE_TYPES:
+            return False
+        if self.order_type not in ORDER_TYPES:
+            return False
 
         # all checks has passed
         return True

@@ -322,7 +322,7 @@ class SupervisorEntryTests(unittest.TestCase):
         order = Order(order_type='Limit', qty=228, price=1000, side='Buy', passive=True)
         self.exchange_mock.place_order.assert_called_once_with(order)
 
-    def test_fb_entry_last_price_timeouted(self):
+    def test_fb_entry_last_price_timedout(self):
         self.exchange_mock.get_last_price_ws.return_value = 1000
         self.exchange_mock.get_order_status_ws.return_value = 'New'
         self.exchange_mock.conn.get_tick_size.return_value = 0.5
