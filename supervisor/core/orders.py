@@ -1,6 +1,17 @@
 from typing import Callable
 
 
+ORDER_TYPES = [
+    'Limit',
+    'Stop'
+]
+
+ORDER_SIDE_TYPES = [
+    'Buy',
+    'Sell'
+]
+
+
 class Order:
     def __init__(self,
                  symbol: str = 'XBTUSD',
@@ -30,7 +41,7 @@ class Order:
 
         self.is_trailing = False
 
-        # DO NOT USE Supervisor.stop_cycle() into callbacks!!!
+        # DO NOT USE Supervisor.stop_cycle() in callbacks!!!
         # It causes 100% deadlock
         self._on_reject: Callable = None
         self._on_fill: Callable = None
@@ -63,30 +74,36 @@ class Order:
         Method made for prevent 4xx errors on API requests.
         """
 
-        # all orders must have symbol
+        # all orders must has a symbol
         if self.symbol is None:
             return False
-        # all orders must have order type
+        # all orders must has an order type
         if self.order_type is None:
             return False
-        # limit orders must have price
-        if self.order_type == 'Limit' and self.price is None:
+        # all orders must has a side
+        if self.side is None:
             return False
-        # stop-loss orders must have stop_px
-        if self.order_type == 'Stop' and self.stop_px is None:
+        # Only Close orders may has no quantity
+        if self.qty is None and not self.close:
             return False
-        # price must be positive
-        if self.price is not None and self.price < 0:
-            return False
-        # stop_px must be positive
-        if self.stop_px is not None and self.stop_px < 0:
-            return False
-        # for sell orders use side='Sell'
-        if self.qty <= 0:
-            return False
-        # side only can be Buy or Sell
-        if self.side not in ['Buy', 'Sell']:
-            return False
+
+        # Check limit orders below:
+        if self.order_type == 'Limit':
+            if self.price is None:
+                return False
+            # price must be positive
+            if self.price <= 0:
+                return False
+
+        # Check stop orders below:
+        elif self.order_type == 'Stop':
+            if self.stop_px is None:
+                return False
+            # stop_px must be positive
+            if self.stop_px <= 0:
+                return False
+
+        # all checks has passed
         return True
 
     def get_comparison_params(self) -> list:
