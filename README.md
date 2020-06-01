@@ -118,7 +118,7 @@ Set necessary position size, Supervisor will fix it:
 supervisor.position = 150
 ```
 
-If Supervisor is already running, you can use on of provided entry methods
+If Supervisor is already running, you can use one of provided entry methods
 
 ```python
 supervisor.stop_cycle()
