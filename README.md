@@ -168,7 +168,7 @@ You can stop, continue and exit Supervisor cycle:
 
 ```python
 supervisor.stop_cycle()
-# do staff
+# do stuff
 supervisor.run_cycle()  # this method can both run and continue cycle
 supervisor.exit_cycle() # this method terminates cycle`s thread and quit correctly
 ```
