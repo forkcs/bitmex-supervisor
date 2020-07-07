@@ -187,8 +187,13 @@ class Supervisor:
                 init_price = self.exchange.get_last_price_ws() * (100 + deviation) / 100
             else:
                 init_price = self.exchange.get_last_price_ws() * (100 - deviation) / 100
+        # if price_type is 'last'
         else:
-            init_price = self.exchange.get_last_price_ws()
+            ticker = self.exchange.get_ticker_ws()
+            if qty > 0:
+                init_price = ticker['buy']
+            else:
+                init_price = ticker['sell']
 
         init_price = to_nearest(init_price, self.exchange.conn.get_tick_size())
 
