@@ -174,7 +174,7 @@ class OrdersCallbacksTests(unittest.TestCase):
         sleep(1)
 
         callback.assert_called_once()
-        self.assertListEqual([], self.supervisor._orders)
+        self.assertListEqual([], self.supervisor.orders)
 
     def test_rejected_callback_will_be_called(self):
         order = Order(order_type='Limit', side='Sell', qty=228, price=1000)
@@ -191,7 +191,7 @@ class OrdersCallbacksTests(unittest.TestCase):
         sleep(1)
 
         callback.assert_called_once()
-        self.assertListEqual([], self.supervisor._orders)
+        self.assertListEqual([], self.supervisor.orders)
 
     def test_several_filled_orders_at_the_same_time(self):
         order_1 = Order(order_type='Limit', side='Sell', qty=228, price=1000)
@@ -226,4 +226,4 @@ class OrdersCallbacksTests(unittest.TestCase):
         callback_2.assert_called_once()
         callback_3.assert_called_once()
         callback_4.assert_called_once()
-        self.assertListEqual([], self.supervisor._orders)
+        self.assertListEqual([], self.supervisor.orders)

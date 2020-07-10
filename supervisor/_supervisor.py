@@ -20,7 +20,7 @@ class Supervisor:
         self.logger = setup_supervisor_logger('supervisor')
 
         self.position_size = 0
-        self._orders = []
+        self.orders = []
         self._trackers = []
 
         self.sync_thread = Thread(target=self._synchronization_cycle)
@@ -83,7 +83,7 @@ class Supervisor:
         """
 
         orders_to_place = []
-        for order in self._orders:
+        for order in self.orders:
             if order.order_id is None:
                 orders_to_place.append(order)
             else:
@@ -92,7 +92,7 @@ class Supervisor:
 
                     if order.is_trailing:
                         order.tracker.exit()
-                    self._orders.remove(order)
+                    self.orders.remove(order)
 
                     if order.side == 'Buy':
                         self.position_size += order.qty
@@ -106,7 +106,7 @@ class Supervisor:
                     self.logger.info(f'Order cancelled, trying to place it: '
                                      f'{order.order_type} {order.side} {order.qty} by {order.price or order.stop_px}')
                 elif status == 'Rejected':
-                    self._orders.remove(order)
+                    self.orders.remove(order)
                     self.logger.info(f'Order rejected: {order.order_id} {order.order_type} '
                                      f'{order.side} {order.qty} by {order.price or order.stop_px}')
                     order.on_reject()
@@ -127,13 +127,13 @@ class Supervisor:
         except HTTPError as e:
             if 'Order price is above the liquidation price of current' in e.response.text:
                 order = orders_to_place[0]
-                self._orders.remove(order)
+                self.orders.remove(order)
                 self.logger.warning(f'Order price is above the liquidation price of current position: '
                                     f'{order.order_type} {order.side} {order.qty} by {order.price or order.stop_px}')
 
     def cancel_needless_orders(self):
         real_orders = self.exchange.get_open_orders_ws().copy()
-        needed_orders = self._orders.copy()
+        needed_orders = self.orders.copy()
 
         # difference of the lists with duplicates
         for _ in range(len(real_orders)):
@@ -214,7 +214,7 @@ class Supervisor:
 
     def add_order(self, order: Order) -> None:
         if order.is_valid():
-            self._orders.append(order)
+            self.orders.append(order)
             self.logger.info(f'New order: {order.order_type} {order.side} {order.qty} by '
                              f'{order.price or order.stop_px}')
         else:
@@ -233,11 +233,11 @@ class Supervisor:
             test = 'testnet' in self.exchange.conn.base_url
             order.tracker = TrailingShell(order=order, offset=offset, tick_size=tick_size, test=test)
             order.tracker.start_trailing(initial_price=self.exchange.get_last_price_ws())
-            self._orders.append(order)
+            self.orders.append(order)
 
     def remove_order(self, order: Order):
-        if order in self._orders:
-            self._orders.remove(order)
+        if order in self.orders:
+            self.orders.remove(order)
             self.logger.info(f'Forget the order: {order.order_type} {order.side} {order.qty} by '
                              f'{order.price or order.stop_px}')
 
@@ -279,4 +279,4 @@ class Supervisor:
 
     def reset(self):
         self.position_size = 0
-        self._orders = []
+        self.orders = []

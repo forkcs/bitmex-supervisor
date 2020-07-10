@@ -64,7 +64,7 @@ class SupervisorCycleTests(unittest.TestCase):
         self.supervisor.reset()
 
         self.assertEqual(0, self.supervisor.position_size)
-        self.assertListEqual([], self.supervisor._orders)
+        self.assertListEqual([], self.supervisor.orders)
 
 
 class SupervisorOrdersTests(unittest.TestCase):
@@ -81,7 +81,7 @@ class SupervisorOrdersTests(unittest.TestCase):
         new_order = Order(order_type='Limit', qty=228, price=1000, side='Buy')
         self.supervisor.add_order(new_order)
 
-        self.assertIn(new_order, self.supervisor._orders)
+        self.assertIn(new_order, self.supervisor.orders)
 
     def test_add_empty_order(self):
         with self.assertRaises(ValueError):
@@ -92,7 +92,7 @@ class SupervisorOrdersTests(unittest.TestCase):
         self.supervisor.add_order(new_order)
 
         self.supervisor.remove_order(new_order)
-        self.assertNotIn(new_order, self.supervisor._orders)
+        self.assertNotIn(new_order, self.supervisor.orders)
 
 
 class SyncOrdersTests(unittest.TestCase):
@@ -201,7 +201,7 @@ class SyncOrdersTests(unittest.TestCase):
         # assert that we didn`t place this order
         self.exchange_mock.place_order.not_called(order)
         # assert that Supervisor forget this order
-        self.assertNotIn(order, self.supervisor._orders)
+        self.assertNotIn(order, self.supervisor.orders)
         # assert that Supervisor call matching callback
         on_reject_mock.assert_called_once()
 
@@ -223,7 +223,7 @@ class SyncOrdersTests(unittest.TestCase):
         # assert that we didn`t place this order
         self.exchange_mock.place_order.not_called(order)
         # assert that Supervisor forget this order
-        self.assertNotIn(order, self.supervisor._orders)
+        self.assertNotIn(order, self.supervisor.orders)
         # assert that Supervisor call matching callback
         on_filled_mock.assert_called_once()
 
@@ -245,7 +245,7 @@ class SyncOrdersTests(unittest.TestCase):
         # assert that we didn`t place this order
         self.exchange_mock.place_order.not_called(order)
         # assert that Supervisor forget this order
-        self.assertNotIn(order, self.supervisor._orders)
+        self.assertNotIn(order, self.supervisor.orders)
         # assert that Supervisor call matching callback
         on_filled_mock.assert_called_once()
 
@@ -262,7 +262,7 @@ class SyncOrdersTests(unittest.TestCase):
         # assert that method has been called
         self.exchange_mock.place_order.assert_called_once_with(order)
         # assert that we catch the exception and forget the order
-        self.assertNotIn(order, self.supervisor._orders)
+        self.assertNotIn(order, self.supervisor.orders)
 
 
 class SyncPositionTests(unittest.TestCase):
