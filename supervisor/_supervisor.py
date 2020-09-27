@@ -75,7 +75,7 @@ class Supervisor:
     def check_needed_orders(self):
         """Check ever order from self._orders.
 
-        If order has no order id, it`s considered as unplaced, so try to place them.
+        If order has no order id, it`s considered as unplaced, so try to place it.
         If order has order id, but isn`t actually placed, there are 3 cases:
             - order is cancelled. Then we try to place it anew;
             - order is rejected. It`s useless to try placing it, so forget this order;
