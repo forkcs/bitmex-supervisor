@@ -24,7 +24,7 @@ These instructions will get you a copy of the project up and running on your loc
 For now we support only the version of Python that we use in development.
 
 ```
-Pyhton 3.8 +
+Python 3.8 +
 ```
 
 ### Installing
