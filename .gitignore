@@ -11,3 +11,5 @@ htmlcov/
 .coverage
 
 /main.py
+
+.python-version
