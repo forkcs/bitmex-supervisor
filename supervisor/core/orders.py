@@ -54,7 +54,7 @@ class Order:
         return False
 
     def almost_equal(self, other):
-        """If ordes are same at all except price or stop_ps."""
+        """If orders are same at all except price or stop_ps."""
 
         if self.get_not_price_comparison_params() == other.get_not_price_comparison_params():
             return True
@@ -71,7 +71,7 @@ class Order:
     def is_valid(self) -> bool:
         """Validate order parameters for common errors.
 
-        Method made for prevent 4xx errors on API requests.
+        Method is made for preventing 4xx errors on API requests.
         """
 
         # all orders must has a symbol
@@ -140,7 +140,7 @@ class Order:
         return parameters
 
     def as_dict(self, include_empty=False) -> dict:
-        """This order representation made to be similar to BitMEX API order objects."""
+        """This order representation is made to be similar to BitMEX API order objects."""
 
         order_dict = {}
         exec_inst = []
@@ -181,7 +181,7 @@ class Order:
 
     @staticmethod
     def from_dict(order_dict: dict):
-        """This method creates new Order object from standart BitMEX API order dictionary."""
+        """This method creates new Order object from standard BitMEX API order dictionary."""
 
         new_order = Order()
         new_order.symbol = order_dict.get('symbol', 'XBTUSD')

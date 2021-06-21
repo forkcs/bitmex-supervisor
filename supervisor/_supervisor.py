@@ -37,7 +37,7 @@ class Supervisor:
 
             # keep ws connection open
             if not self.exchange.is_open():
-                self.logger.warning('Websocket connection unexpectly closed, restarting...')
+                self.logger.warning('Websocket connection unexpectedly closed, restarting...')
                 self.exchange.reinit_ws()
                 continue
 
@@ -79,7 +79,7 @@ class Supervisor:
         If order has order id, but isn`t actually placed, there are 3 cases:
             - order is cancelled. Then we try to place it anew;
             - order is rejected. It`s useless to try placing it, so forget this order;
-            - order is filled. We needn`t place it anymore, so just forget this order.
+            - order is filled. We need not place it anymore, so just forget this order.
         """
 
         orders_to_place = []

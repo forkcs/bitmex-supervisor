@@ -34,7 +34,7 @@ def generate_expires():
 # Verb must be uppercased, url is relative, nonce must be an increasing 64-bit integer
 # and the data, if present, must be JSON without whitespace between keys.
 #
-# For example, in psuedocode (and in real code below):
+# For example, in pseudocode (and in real code below):
 #
 # verb=POST
 # url=/api/v1/order
