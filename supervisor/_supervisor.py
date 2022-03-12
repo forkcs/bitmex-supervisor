@@ -65,7 +65,7 @@ class Supervisor:
             self.logger.info(f'Correct position size on {self.position_size - pos_size}.')
 
     def sync_orders(self):
-        """ All the orders synchronization logic should be here."""
+        """ All the orders' synchronization logic should be here."""
 
         # cancel orders at first, it`s important
         self.cancel_needless_orders()
@@ -114,16 +114,10 @@ class Supervisor:
 
     def place_needed_orders(self, orders_to_place: list):
         try:
-            if len(orders_to_place) == 1:
-                order = orders_to_place[0]
+            for order in orders_to_place:
                 self.exchange.place_order(order)
                 self.logger.info(f'Place {order.order_type} order: '
                                  f'{order.side} {order.qty} by {order.price or order.stop_px}.')
-            elif len(orders_to_place) > 1:
-                self.exchange.bulk_place_orders(orders_to_place)
-                for order in orders_to_place:
-                    self.logger.info(f'Place {order.order_type} order: '
-                                     f'{order.side} {order.qty} by {order.price or order.stop_px}.')
         except HTTPError as e:
             if 'Order price is above the liquidation price of current' in e.response.text:
                 order = orders_to_place[0]
